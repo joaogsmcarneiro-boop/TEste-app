@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arcade v7.0 | Snake · Neon Jump · Crystal Quest</title>
+<title>Arcade v8.0 | Snake · Neon Jump · Crystal Quest</title>
 <style>
 :root{--bg:#0a1020;--panel:#141e32;--line:#33445c;--ink:#ecf6ff;--muted:#a6b8d0;--cyan:#4ddbf1;--yellow:#ffdd69;--pink:#fd7597;--green:#84eba1}
 *{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 25% 0%,#1b3456,transparent 42%),#090f1f;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -52,7 +52,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 </head>
 <body>
 <main>
-<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 7.0</b> · PYTHON · JAVA · C++</div></header>
+<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 8.0</b> · PYTHON · JAVA · C++</div></header>
 
 <section class="cover-gallery" aria-label="Escolha seu jogo">
  <button type="button" class="cover-card" id="cover-snake" aria-label="Jogar Snake">
@@ -565,6 +565,7 @@ function makeFloor(n){
   }
   const drops=["potion","shard","blade","boots","shield","orb"];
  for(let i=0;i<2+n;i++){const p=spot();if(p)rp.items.push({...p,type:drops[i%drops.length]})}
+  if(n>=2){const relic=spot();if(relic)rp.items.push({...relic,type:["feather","storm","hourglass"][n%3]})}
   const chest=spot();if(chest)rp.chests.push({...chest,open:false});
   if(n>1){const altar=spot();if(altar)rp.altars.push({...altar,used:false})}
   if(n>1)for(let i=0;i<Math.min(4,n-1);i++){const p=spot();if(p)rp.traps.push({...p,phase:i*.6,active:false})}
@@ -577,7 +578,8 @@ function newRpg(){
     floor:1,shards:0,kills:0,potions:2,note:"",noteTime:0,inv:0,
     cd:0,atk:0,enemyTick:0,moveTick:0,choosing:false,mobs:[],crystals:[],items:[],walls:new Set(),
    stamina:4,boots:0,shield:0,magic:1,dashCd:0,dashFx:0,bolts:[],slashes:[],fx:[],walkAnim:0,
-  xp:0,xpNext:5,critical:0,lifesteal:0,fire:0,treasures:0,shake:0};
+  xp:0,xpNext:5,critical:0,lifesteal:0,fire:0,treasures:0,shake:0,
+  whirlCD:0,whirlFX:0,shockCD:0,shockFX:0,combo:0,comboClock:0,revive:0,haste:0,thunder:0,slow:0};
   makeFloor(1);
 }
 function hitWall(x,y){return !walkable(x,y)}
@@ -593,6 +595,9 @@ function pickUp(){
     else if(v.type==="boots"){rp.boots++;announce("BOTAS EQUIPADAS: ESQUIVA MAIS RÁPIDA")}
     else if(v.type==="shield"){rp.shield++;announce("ESCUDO EQUIPADO: -1 DE DANO")}
     else if(v.type==="orb"){rp.magic=Math.min(6,rp.magic+3);announce("ORBE: +3 MAGIAS (F)")}
+    else if(v.type==="feather"){rp.revive=1;announce("PENA DA FÊNIX: RESSURREIÇÃO ÚNICA")}
+    else if(v.type==="storm"){rp.thunder++;announce("RELÍQUIA DO TROVÃO: HABILIDADES MAIS FORTES")}
+    else if(v.type==="hourglass"){rp.haste++;announce("AMPULHETA: ANDAR E ESQUIVAR MAIS RÁPIDO")}
   }
 }
 function rpgStep(x,y){
@@ -608,7 +613,7 @@ function moveRpg(dx,dy){
 }
 function dodgeRpg(){
  if(!G.running||rp.dashCd>0||rp.stamina<.75)return;
- rp.stamina-=.75;rp.dashCd=Math.max(.65,1.7-rp.boots*.45);
+ rp.stamina-=.75;rp.dashCd=Math.max(.4,1.7-rp.boots*.45-rp.haste*.18);
  rp.inv=Math.max(rp.inv,.67);rp.dashFx=.35;
  const [dx,dy]=rp.p.dir;
  for(let i=0;i<2+Math.min(1,rp.boots);i++)if(!rpgStep(rp.p.x+dx,rp.p.y+dy))break;
@@ -637,12 +642,41 @@ function defeatMobs(){
  for(const e of fallen){
   G.score+=e.type==="boss"?500:e.type==="miniboss"?220:50;
   rp.shards+=e.type==="boss"?16:e.type==="miniboss"?7:1;rp.kills++;
+  rp.combo=Math.min(12,rp.combo+1);rp.comboClock=3;
   rp.xp++;if(rp.xp>=rp.xpNext){rp.xp=0;rp.p.level++;rp.xpNext+=2;rp.p.max++;rp.p.hp=Math.min(rp.p.max,rp.p.hp+2);announce("SUBIU DE NÍVEL! +VIDA")}
   burstRpg(e.x,e.y,"#ffe5b8");
   if(Math.random()<.3)rp.items.push({x:e.x,y:e.y,type:Math.random()<.5?"potion":"shard"});
  }
  if(fallen.some(e=>e.type==="boss"))announce("GUARDIÃO DERROTADO!");
  rp.mobs=rp.mobs.filter(e=>e.hp>0);
+}
+function whirlwindRpg(){
+ if(!G.running||rp.whirlCD>0||rp.stamina<2)return;
+ rp.stamina-=2;rp.whirlCD=Math.max(2.4,4.5-rp.haste*.25);rp.whirlFX=.5;
+ rp.shake=.12;
+ let hits=0;
+ for(const e of rp.mobs){
+  if(Math.max(Math.abs(e.x-rp.p.x),Math.abs(e.y-rp.p.y))<=2){
+   e.hp-=2+rp.p.damage+rp.thunder;e.wind=0;e.cool=.8;hits++;
+   rp.slashes.push({x:e.x,y:e.y,t:.4,kind:"whirl"});
+   burstRpg(e.x,e.y,"#8bf3eb",9);
+  }
+ }
+ defeatMobs();announce(hits?"GIRO! "+hits+" INIMIGOS":"GIRO DEFENSIVO!");
+}
+function shockwaveRpg(){
+ if(!G.running||rp.shockCD>0||rp.magic<2)return;
+ rp.magic-=2;rp.shockCD=6;rp.shockFX=.5;
+ let hits=0;
+ for(const e of rp.mobs){
+  const d=Math.abs(e.x-rp.p.x)+Math.abs(e.y-rp.p.y);
+  if(d<=4){
+    e.hp-=3+rp.fire+rp.thunder*2;e.wind=0;e.cool=1.2;hits++;
+    rp.slashes.push({x:e.x,y:e.y,t:.55,kind:"shock"});
+    burstRpg(e.x,e.y,"#d1a0ff",12);
+  }
+ }
+ defeatMobs();announce(hits?"ONDA ARCANA: "+hits+" ALVOS":"ONDA ARCANA DISPARADA");
 }
 function spellRpg(){
  if(!G.running||rp.magic<1)return;
@@ -669,19 +703,26 @@ function damage(n){
  const actual=Math.max(1,n-rp.shield);
  rp.p.hp=Math.max(0,rp.p.hp-actual);rp.inv=1.1;
  announce("-"+actual+" VIDA: ESQUIVE DAS MARCAS VERMELHAS!");
- if(rp.p.hp<=0)endExpedition(false);
+ if(rp.p.hp<=0){
+  if(rp.revive>0){rp.revive--;rp.p.hp=Math.max(3,Math.ceil(rp.p.max*.4));
+    rp.inv=2;rp.shake=.45;burstRpg(rp.p.x,rp.p.y,"#ffcf82",27);
+    announce("FÊNIX ATIVADA! SEGUNDA CHANCE");
+  }else endExpedition(false);
+ }
 }
 function attackRpg(){
  if(!G.running||rp.cd>0)return;
  if(rp.stamina<1){announce("SEM ENERGIA: MOVA-SE PARA RECUPERAR!");return}
- rp.stamina--;rp.atk=.24;rp.cd=.42;
+ rp.stamina--;rp.atk=.31;rp.cd=Math.max(.25,.42-rp.haste*.035);
+ rp.comboClock=2.1;
  const [dx,dy]=rp.p.dir;let count=0;
  const range=rp.p.damage>=3?2:1;
  for(const e of rp.mobs){
   const rx=e.x-rp.p.x,ry=e.y-rp.p.y;
   const forward=rx*dx+ry*dy,lateral=Math.abs(rx*dy-ry*dx);
   if(forward>=1&&forward<=range&&lateral<=1){
-   e.hp-=rp.p.damage+rp.fire;e.wind=0;count++;
+   e.hp-=rp.p.damage+rp.fire+Math.min(2,Math.floor(rp.combo/3))+
+     (Math.random()<rp.critical?2:0);e.wind=0;count++;
    rp.slashes.push({x:e.x,y:e.y,t:.3,kind:"slash"});
    for(let i=0;i<8;i++){
      const a=i*Math.PI/4;rp.fx.push({x:ox+(e.x+.5)*T,y:oy+(e.y+.5)*T,vx:Math.cos(a)*75,vy:Math.sin(a)*75,life:.35,color:"#ffe2a0"});
@@ -730,6 +771,10 @@ function updateRpg(dt){
  }
  rp.fx.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt});
  rp.fx=rp.fx.filter(p=>p.life>0).slice(-100);
+ rp.whirlCD=Math.max(0,rp.whirlCD-dt);rp.whirlFX=Math.max(0,rp.whirlFX-dt);
+ rp.shockCD=Math.max(0,rp.shockCD-dt);rp.shockFX=Math.max(0,rp.shockFX-dt);
+ rp.shake=Math.max(0,rp.shake-dt);rp.slow=Math.max(0,rp.slow-dt);
+ rp.comboClock=Math.max(0,rp.comboClock-dt);if(rp.comboClock===0)rp.combo=0;
  rp.atk=Math.max(0,rp.atk-dt);rp.cd=Math.max(0,rp.cd-dt);
  rp.dashCd=Math.max(0,rp.dashCd-dt);rp.dashFx=Math.max(0,rp.dashFx-dt);
  rp.inv=Math.max(0,rp.inv-dt);rp.noteTime=Math.max(0,rp.noteTime-dt);
@@ -743,7 +788,9 @@ function updateRpg(dt){
  }
  for(const b of rp.bolts){
   b.x+=b.vx*dt;b.y+=b.vy*dt;b.t-=dt;
-  if(Math.hypot(b.x-rp.p.x,b.y-rp.p.y)<.5){damage(b.power);b.t=-1}
+  if(Math.hypot(b.x-rp.p.x,b.y-rp.p.y)<.5){
+    damage(b.power);if(b.kind==="frost"&&rp.inv>0)rp.slow=2;b.t=-1
+  }
   if(!walkable(Math.round(b.x),Math.round(b.y)))b.t=-1;
  }
  rp.bolts=rp.bolts.filter(b=>b.t>0);
@@ -759,7 +806,7 @@ function updateRpg(dt){
  }
  if(!G.running)return;
  rp.moveTick+=dt;rp.enemyTick+=dt;
- if(rp.moveTick>.145){
+ if(rp.moveTick>Math.max(.09,.145-rp.haste*.015)+(rp.slow>0?.065:0)){
   rp.moveTick=0;
   const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
   for(const k of ["ArrowUp","KeyW","ArrowDown","KeyS","ArrowLeft","KeyA","ArrowRight","KeyD"])
@@ -770,10 +817,10 @@ function updateRpg(dt){
   for(const e of rp.mobs){
    if(e.wind>0)continue;
    const dx=rp.p.x-e.x,dy=rp.p.y-e.y,dist=Math.abs(dx)+Math.abs(dy);
-   if((e.type==="bat"||e.type==="boss")&&dist>=2&&dist<=8&&e.cool<=0&&
+   if(["bat","boss","wisp","frost"].includes(e.type)&&dist>=2&&dist<=8&&e.cool<=0&&
        (Math.abs(dx)<=1||Math.abs(dy)<=1)){
     const d=Math.hypot(dx,dy)||1;
-    rp.bolts.push({x:e.x,y:e.y,vx:dx/d*3.2,vy:dy/d*3.2,t:3,power:e.type==="boss"?2:1});
+    rp.bolts.push({x:e.x,y:e.y,vx:dx/d*3.2,vy:dy/d*3.2,t:3,power:e.type==="boss"?2:1,kind:e.type});
     e.cool=2.2;
    }
    if(dist<=1&&e.cool<=0){e.wind=e.type==="boss"?.85:.64;e.aimX=rp.p.x;e.aimY=rp.p.y;continue}
