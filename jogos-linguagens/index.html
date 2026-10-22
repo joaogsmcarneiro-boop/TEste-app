@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arcade v6.0 | Snake · Neon Jump · Crystal Quest</title>
+<title>Arcade v7.0 | Snake · Neon Jump · Crystal Quest</title>
 <style>
 :root{--bg:#0a1020;--panel:#141e32;--line:#33445c;--ink:#ecf6ff;--muted:#a6b8d0;--cyan:#4ddbf1;--yellow:#ffdd69;--pink:#fd7597;--green:#84eba1}
 *{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 25% 0%,#1b3456,transparent 42%),#090f1f;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -52,7 +52,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 </head>
 <body>
 <main>
-<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 6.0</b> · PYTHON · JAVA · C++</div></header>
+<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 7.0</b> · PYTHON · JAVA · C++</div></header>
 
 <section class="cover-gallery" aria-label="Escolha seu jogo">
  <button type="button" class="cover-card" id="cover-snake" aria-label="Jogar Snake">
@@ -504,7 +504,10 @@ const themes=[
 ["BOSQUE PERDIDO","#204338","#284f41","#668879","#91e9b3"],
 ["CATACUMBAS","#2d3151","#373a59","#77758c","#b89ef6"],
 ["CAVERNAS DE BRASA","#4a3337","#523a3c","#94756b","#ffb88e"],
-["TRONO DO GUARDIÃO","#273a50","#2e4258","#7c90a6","#91e9ff"]];
+["FORTALEZA DO ECLIPSE","#273a50","#2e4258","#7c90a6","#91e9ff"],
+["TUNDRA DE CRISTAL","#1c4456","#285668","#87b4c4","#b6fcff"],
+["TRONO ASTRAL","#222047","#37346a","#7977b0","#dfadff"]];
+const RPG_FINAL_FLOOR=6;
 let progress={shards:0,best:1,wins:0};
 try{const v=JSON.parse(localStorage.getItem("crystal_quest_roguelite_v3")||"null");if(v&&Number.isFinite(v.shards))progress={shards:Math.max(0,v.shards),best:v.best||1,wins:v.wins||0}}catch(e){}
 function saveProgress(){try{localStorage.setItem("crystal_quest_roguelite_v3",JSON.stringify(progress))}catch(e){}}
@@ -517,7 +520,7 @@ function flood(){
   return q;
 }
 function makeFloor(n){
-  rp.floor=n;rp.got=0;rp.needed=n===4?3:2;
+  rp.floor=n;rp.got=0;rp.needed=n>=4?3:2;rp.chests=[];rp.altars=[];rp.traps=[];rp.trapTick=0;
   rp.mobs=[];rp.crystals=[];rp.items=[];rp.p.x=2;rp.p.y=6;rp.p.drawX=2;rp.p.drawY=6;rp.p.dir=[1,0];
   rp.atk=0;rp.cd=0;rp.inv=1.4;rp.enemyTick=0;rp.moveTick=0;rp.choosing=false;
   rp.walls=new Set();
@@ -541,21 +544,26 @@ function makeFloor(n){
   for(let i=0;i<rp.needed;i++){const p=spot();if(p)rp.crystals.push(p)}
   for(let i=0;i<n+3;i++){
     const p=spot();if(!p)break;
-    const type=n===4&&i===0?"boss":["slime","bat","guard"][(i+n)%3];
-    const hp=type==="boss"?12:type==="guard"?5:type==="bat"?2:3;
+    const type=n===6&&i===0?"boss":n===4&&i===0?"miniboss":
+   ["slime","bat","guard","wisp","charger","frost"][(i+n)%(n<3?3:n<5?5:6)];
+    const hp=type==="boss"?18:type==="miniboss"?11:type==="guard"?5:type==="charger"?5:type==="frost"?4:type==="bat"?2:3;
     rp.mobs.push({...p,type,hp,max:hp,cool:0,drawX:p.x,drawY:p.y,anim:Math.random()*5});
   }
   const drops=["potion","shard","blade","boots","shield","orb"];
  for(let i=0;i<2+n;i++){const p=spot();if(p)rp.items.push({...p,type:drops[i%drops.length]})}
+  const chest=spot();if(chest)rp.chests.push({...chest,open:false});
+  if(n>1){const altar=spot();if(altar)rp.altars.push({...altar,used:false})}
+  if(n>1)for(let i=0;i<Math.min(4,n-1);i++){const p=spot();if(p)rp.traps.push({...p,phase:i*.6,active:false})}
   progress.best=Math.max(progress.best,n);saveProgress();
-  announce(n===4?"CHEFE FINAL: O GUARDIÃO!":"ANDAR "+n+" - COLETE OS CRISTAIS!");
+  announce(n===6?"CHEFE FINAL: SOBERANO ASTRAL!":n===4?"MINICHEFE: SENTINELA!":"ANDAR "+n+" - COLETE OS CRISTAIS!");
 }
 function newRpg(){
   const plus=Math.min(4,Math.floor(progress.shards/12));
   rp={p:{x:2,y:6,hp:8+plus,max:8+plus,damage:1,level:1,dir:[1,0]},
     floor:1,shards:0,kills:0,potions:2,note:"",noteTime:0,inv:0,
     cd:0,atk:0,enemyTick:0,moveTick:0,choosing:false,mobs:[],crystals:[],items:[],walls:new Set(),
-   stamina:4,boots:0,shield:0,magic:1,dashCd:0,dashFx:0,bolts:[],slashes:[],fx:[],walkAnim:0};
+   stamina:4,boots:0,shield:0,magic:1,dashCd:0,dashFx:0,bolts:[],slashes:[],fx:[],walkAnim:0,
+  xp:0,xpNext:5,critical:0,lifesteal:0,fire:0,treasures:0,shake:0};
   makeFloor(1);
 }
 function hitWall(x,y){return !walkable(x,y)}
@@ -616,8 +624,8 @@ function endExpedition(win){
   progress.shards+=rp.shards;
   if(win)progress.wins++;
   saveProgress();
-  finish(win?"VITÓRIA! 4 ANDARES!":"EXPEDIÇÃO ENCERRADA",
-    "Andar alcançado: "+rp.floor+"/4\nFragmentos obtidos: "+rp.shards+
+  finish(win?"VITÓRIA! SEIS ANDARES!":"EXPEDIÇÃO ENCERRADA",
+    "Andar alcançado: "+rp.floor+"/"+RPG_FINAL_FLOOR+"\nFragmentos obtidos: "+rp.shards+
     "\nTotal salvo no navegador: "+progress.shards+
     "\nCada 12 fragmentos dão +1 de vida inicial (até +4).");
 }
@@ -652,13 +660,14 @@ function potion(){
     rp.potions--;rp.p.hp=Math.min(rp.p.max,rp.p.hp+4);announce("+4 VIDA");
   }
 }
-function portalReady(){return rp.got>=rp.needed&&(rp.floor<4||!rp.mobs.some(e=>e.type==="boss"))}
+function portalReady(){return rp.got>=rp.needed&&(rp.floor!==4||!rp.mobs.some(e=>e.type==="miniboss"))&&
+  (rp.floor!==RPG_FINAL_FLOOR||!rp.mobs.some(e=>e.type==="boss"))}
 function exitRpg(){
   if(!G.running)return;
   if(rp.p.x<17||Math.abs(rp.p.y-6)>1){announce("VÁ ATÉ O PORTAL À DIREITA!");return}
   if(!portalReady()){announce(rp.got<rp.needed?"FALTAM "+(rp.needed-rp.got)+" CRISTAIS!":"DERROTE O CHEFE!");return}
   rp.shards+=3;
-  if(rp.floor===4){endExpedition(true);return}
+  if(rp.floor===RPG_FINAL_FLOOR){endExpedition(true);return}
   rp.choosing=true;G.running=false;
   pop("ANDAR "+rp.floor+" CONCLUÍDO","Escolha seu poder para o próximo andar:");
   document.getElementById("startBtn").style.display="none";
