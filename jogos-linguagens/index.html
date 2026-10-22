@@ -125,7 +125,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 </section>
 <div class="controls">
 <div class="pad"><span></span><button class="touch" data-key="ArrowUp">▲</button><span></span><button class="touch" data-key="ArrowLeft">◀</button><button class="touch" data-key="ArrowDown">▼</button><button class="touch" data-key="ArrowRight">▶</button></div>
-<div class="controlR"><button class="touch action" data-key="Space">PULAR / ATACAR</button><button class="touch action" data-key="KeyH">CURA</button><button class="touch action" data-key="KeyE">PORTAL</button><button class="touch action" data-key="ShiftLeft">ESQUIVA</button><button class="touch action" data-key="KeyF">MAGIA</button></div>
+<div class="controlR"><button class="touch action" data-key="Space">PULAR / ATACAR</button><button class="touch action" data-key="KeyH">CURA</button><button class="touch action" data-key="KeyE">PORTAL</button><button class="touch action" data-key="ShiftLeft">ESQUIVA</button><button class="touch action" data-key="KeyF">MAGIA</button><button class="touch action" data-key="KeyQ">GIRO</button><button class="touch action" data-key="KeyC">ONDA</button></div>
 </div>
 <div class="info" id="info"></div>
 <footer>Versões para navegador inspiradas nos projetos originais em Python, Java e C++. A execução aqui usa JavaScript e HTML Canvas.</footer>
@@ -458,9 +458,9 @@ function drawJump(){
    rect(x,JGROUND-4,5,8,"#f47ca0");rect(x+gap.w-5,JGROUND-4,5,8,"#f47ca0");
  }
  for(const p of jp.platforms){
-   const x=p.x-jp.progress+185;if(x>1010||x+p.w<-40)continue;
+   const x=p.x-jp.progress+185;if(x>1010||x+p.w<-40||p.broken)continue;
    g.save();g.shadowColor=scene.accent;g.shadowBlur=11;
-   rect(x,p.y,p.w,15,scene.accent);g.shadowBlur=0;rect(x+4,p.y+5,p.w-8,12,"#293251");
+   rect(x,p.y,p.w,15,p.fragile?"#ffd68e":scene.accent);g.shadowBlur=0;rect(x+4,p.y+5,p.w-8,12,"#293251");
    rect(x+7,p.y+16,p.w-14,12,"#18223d");
    for(let i=0;i<p.w/24;i++)rect(x+8+i*24,p.y+20,13,3,"#739bca");
    g.restore();
@@ -489,11 +489,17 @@ function drawJump(){
        g.beginPath();g.moveTo(xx,JGROUND);g.lineTo(xx+w/2,o.y);g.lineTo(xx+w,JGROUND);
        g.closePath();g.fill();g.stroke();
      }
-   }else if(o.type==="saw"){
-     g.save();g.translate(x+o.w/2,JGROUND-31);g.rotate(G.clock*4.8);
+   }else if(o.type==="saw"||o.type==="moving_saw"){
+     g.save();g.translate(x+o.w/2,JGROUND-31+(o.type==="moving_saw"?Math.sin(jp.time*3+o.x*.01)*19:0));g.rotate(G.clock*4.8);
      g.fillStyle="#cea8fe";g.beginPath();
      for(let i=0;i<16;i++){let a=i*Math.PI/8,r=i%2?17:28;g.lineTo(Math.cos(a)*r,Math.sin(a)*r)}
      g.closePath();g.fill();g.fillStyle="#64567c";g.beginPath();g.arc(0,0,13,0,7);g.fill();g.restore();
+   }else if(o.type==="laser"){
+     const active=Math.sin(jp.time*2.6+o.x*.011)>.38;
+     rect(x,o.y+o.h-8,o.w,8,"#49375d");
+     rect(x+5,o.y,8,o.h,"#b98bff");rect(x+o.w-13,o.y,8,o.h,"#b98bff");
+     if(active){g.shadowColor="#ff7ac1";g.shadowBlur=16;rect(x+7,o.y+8,o.w-14,o.h-14,"#ff7ac1")}
+     else{g.globalAlpha=.4;rect(x+7,o.y+13,o.w-14,3,"#ffcaef");g.globalAlpha=1}
    }else if(o.type==="crate"){
      rect(x,o.y,o.w,o.h,"#bc7674");rect(x+5,o.y+5,o.w-10,o.h-10,"#e4ab7d");
      rect(x+20,o.y+5,10,o.h-10,"#9f6871");rect(x+5,o.y+28,o.w-10,9,"#9f6871");
@@ -541,7 +547,7 @@ function drawJump(){
  txt("∞ NEON JUMP  ·  VIDA ÚNICA",25,51,"#ecfaff",18);
  txt("DISTÂNCIA "+Math.floor(jp.progress/10)+" m",25,81,"#ecfaff",16);
  txt("VELOCIDADE "+Math.round(jp.speed),744,52,"#eefaff",16);
- txt("RECORDE "+jp.best,783,81,"#ffe5ab",15);
+ txt("RECORDE "+jp.best,783,81,"#ffe5ab",15);txt("MEDALHAS "+jp.challenges+" · COMBO "+jp.streak,520,110,"#fff3bb",14);
  if(jp.messageTime>0){rect(236,107,493,43,"#132041dd");txt(jp.message,252,135,"#fff1c5",20)}
  st.textContent=Math.floor(jp.progress/10)+" m · "+Math.round(jp.speed)+" px/s · 1 vida";
 }
@@ -1019,6 +1025,11 @@ function drawRpg(){
    g.beginPath();g.arc(ox+b.x*T+20,oy+b.y*T+20,7,0,7);g.fill();g.restore();
   }
   for(const p of rp.fx){g.globalAlpha=Math.max(0,p.life*2);rect(p.x,p.y,4,4,p.color)}g.globalAlpha=1;
+  if(rp.whirlFX>0||rp.shockFX>0){const x=ox+(rp.p.drawX+.5)*T,y=oy+(rp.p.drawY+.5)*T;
+   g.save();g.globalAlpha=Math.min(.8,(rp.whirlFX+rp.shockFX)*1.4);
+   g.strokeStyle=rp.shockFX>0?"#d8aaff":"#89f7d5";g.lineWidth=6;g.shadowColor=g.strokeStyle;g.shadowBlur=17;
+   g.beginPath();g.arc(x,y,38+(1-Math.max(rp.whirlFX,rp.shockFX))*85,0,Math.PI*2);g.stroke();g.restore();
+  }
   for(const f of rp.slashes){g.save();g.globalAlpha=Math.min(1,f.t*3.3);
    rect(ox+f.x*T+6,oy+f.y*T+6,28,28,f.kind==="magic"?"#9be4ff":"#ffe8a2");g.restore()}
   for(const e of rp.mobs){
@@ -1110,11 +1121,12 @@ function drawRpg(){
       "  MAGIA "+rp.magic+"  ESCUDO "+rp.shield+"  BOTAS "+rp.boots,90,530,"#f1f6ff",14);
   txt("CRISTAIS "+rp.got+"/"+rp.needed+" · POÇÕES "+rp.potions+" · FRAG. "+rp.shards,480,22,"#e0fbff",13);
   txt("ANDAR "+rp.floor+"/"+RPG_FINAL_FLOOR+" · "+theme[0]+" · NV "+rp.p.level,81,21,theme[4],16);
+ txt("Q GIRO "+(rp.whirlCD>0?rp.whirlCD.toFixed(1)+"s":"PRONTO")+" · C ONDA "+(rp.shockCD>0?rp.shockCD.toFixed(1)+"s":"PRONTA")+" · COMBO "+rp.combo,500,484,"#f2ddff",12);
   if(rp.noteTime>0){rect(280,44,440,41,"#122039eb");txt(rp.note,292,70,"#ffe9b4",17)}
   st.textContent="Andar "+rp.floor+"/"+RPG_FINAL_FLOOR+" · ♥ "+rp.p.hp+"/"+rp.p.max+" · Cristais "+rp.got+"/"+rp.needed;
 }
 function draw(){if(G.game==="snake")drawSnake();if(G.game==="jump")drawJump();if(G.game==="rpg")drawRpg()}
-function control(key){if(G.game==="rpg"&&rp.choosing){if(["Digit1","Digit2","Digit3"].includes(key))chooseUpgrade(Number(key.slice(-1)));return}if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")interactRpg();else if(key==="ShiftLeft"||key==="ShiftRight"||key==="KeyK")dodgeRpg();else if(key==="KeyF")spellRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
+function control(key){if(G.game==="rpg"&&rp.choosing){if(["Digit1","Digit2","Digit3"].includes(key))chooseUpgrade(Number(key.slice(-1)));return}if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")interactRpg();else if(key==="ShiftLeft"||key==="ShiftRight"||key==="KeyK")dodgeRpg();else if(key==="KeyF")spellRpg();else if(key==="KeyQ")whirlwindRpg();else if(key==="KeyC")shockwaveRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
 window.addEventListener("keydown",e=>{let k=e.code;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space","ShiftLeft","ShiftRight"].includes(k))e.preventDefault();if(keys.has(k)&&e.repeat)return;keys.add(k);control(k)});
 window.addEventListener("keyup",e=>keys.delete(e.code));window.addEventListener("blur",()=>keys.clear());
 document.querySelectorAll("[data-key]").forEach(b=>{b.addEventListener("pointerdown",e=>{e.preventDefault();keys.add(b.dataset.key);control(b.dataset.key)});for(const ev of ["pointerup","pointercancel","pointerleave"])b.addEventListener(ev,()=>keys.delete(b.dataset.key))});
