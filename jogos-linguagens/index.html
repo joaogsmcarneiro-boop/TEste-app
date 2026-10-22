@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcade das Linguagens | Python, Java e C++</title>
+<style>
+:root{--bg:#0a1020;--panel:#141e32;--line:#33445c;--ink:#ecf6ff;--muted:#a6b8d0;--cyan:#4ddbf1;--yellow:#ffdd69;--pink:#fd7597;--green:#84eba1}
+*{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 25% 0%,#1b3456,transparent 42%),#090f1f;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1050px;margin:0 auto;padding:25px 17px 50px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+small,.muted{color:var(--muted)}h1{font-size:clamp(24px,4vw,36px);margin:3px 0 0;letter-spacing:-.8px}
+mark{background:transparent;color:var(--cyan)}.mini{font-size:12px;letter-spacing:.17em;color:var(--green);font-weight:800}
+.pill{border:1px solid #526885;border-radius:25px;color:#c1d6ed;padding:9px 14px;font-size:12px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:20px 0 15px}
+button{font:inherit;cursor:pointer}
+.tab{border:1px solid #344962;background:#182640;color:#d3e4f6;padding:13px 7px;border-radius:12px;transition:.2s;font-size:clamp(12px,2.2vw,16px);font-weight:750}
+.tab.active{border-color:#5de9f6;background:#12374a;box-shadow:0 0 25px #10d2ec22;color:white}
+.stage{border-radius:18px;overflow:hidden;border:1px solid #344963;background:#0b1224;box-shadow:0 22px 55px #0005}
+.meta{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px;background:#17243a;border-bottom:1px solid #2c405c}
+.gameTitle{font-size:19px;font-weight:800}.tag{font-size:12px;color:#f9d773;margin-left:8px}
+.sub{font-size:13px;color:#b3c6dc}.stats{font-size:15px;color:#fce19b;font-weight:bold}
+.canvasWrap{position:relative;display:flex;align-items:center;justify-content:center;background:#0a1224;touch-action:none}
+canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;image-rendering:pixelated;touch-action:none}
+.over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#050a18bd;z-index:2;padding:22px}
+.overlayBox{text-align:center;border:1px solid #5f7597;background:#12233eea;box-shadow:0 20px 45px #0008;border-radius:18px;padding:26px 35px;max-width:460px}
+.overlayBox strong{display:block;font-size:clamp(24px,4vw,35px);margin-bottom:10px}
+.overlayBox p{line-height:1.45;color:#c3d6e9;white-space:pre-line}
+.primary{border:none;border-radius:10px;padding:13px 24px;background:#38ccdd;color:#051326;font-weight:900}
+.toolbar{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;background:#17243a}
+.hints{color:#c0d3e8;font-size:13px}.buttons{display:flex;gap:8px}
+.smBtn{background:#293d5a;color:#fff;border:1px solid #45627f;padding:9px 13px;border-radius:8px}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+.pad{display:grid;grid-template-columns:repeat(3,53px);grid-template-rows:repeat(2,49px);gap:5px}
+.touch{border:1px solid #486481;background:#243754;border-radius:10px;color:white;font-size:19px;font-weight:800;touch-action:none;user-select:none;-webkit-user-select:none}
+.touch:active{background:#3c6e9a}
+.controlR{display:flex;flex-wrap:wrap;gap:8px}
+.action{width:76px;height:54px;font-size:13px}.info{margin-top:14px;padding:16px 18px;background:#141e32;border:1px solid #344963;border-radius:13px;line-height:1.55;color:#c6d8e9;font-size:14px}
+.info b{color:#fff}footer{margin-top:20px;font-size:12px;color:#96aac4;text-align:center}
+@media(max-width:580px){main{padding:15px 9px 35px}.meta{padding:11px}.canvasWrap{min-height:190px}.overlayBox{padding:15px}.controls{justify-content:center}.toolbar{justify-content:center}.hints{font-size:12px}.pad{grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,45px)}.action{width:66px}}
+</style>
+</head>
+<body>
+<main>
+<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill">PYTHON · JAVA · C++</div></header>
+<nav class="tabs" aria-label="Escolher jogo">
+<button type="button" id="tab-snake" class="tab">🐍 Python · Snake</button>
+<button type="button" id="tab-jump" class="tab">⚡ Java · Neon Jump</button>
+<button type="button" id="tab-rpg" class="tab">⚔️ C++ · Mini RPG</button>
+</nav>
+<section class="stage">
+<div class="meta"><div><span class="gameTitle" id="gameTitle">Snake</span><span class="tag" id="gameTag">PYTHON</span><div class="sub" id="gameSub"></div></div><div class="stats" id="stats">Pontos: 0</div></div>
+<div class="canvasWrap"><canvas width="960" height="540" id="game" aria-label="Área do jogo"></canvas><div class="over" id="over"><div class="overlayBox"><strong id="overlayTitle">JOGAR</strong><p id="overlayText"></p><button class="primary" id="startBtn">INICIAR JOGO</button></div></div></div>
+<div class="toolbar"><div class="hints" id="hints">Use setas ou WASD.</div><div class="buttons"><button class="smBtn" id="restartBtn">↻ Reiniciar</button><button class="smBtn" id="pauseBtn">Ⅱ Pausar</button></div></div>
+</section>
+<div class="controls">
+<div class="pad"><span></span><button class="touch" data-key="ArrowUp">▲</button><span></span><button class="touch" data-key="ArrowLeft">◀</button><button class="touch" data-key="ArrowDown">▼</button><button class="touch" data-key="ArrowRight">▶</button></div>
+<div class="controlR"><button class="touch action" data-key="Space">PULAR / ATACAR</button><button class="touch action" data-key="KeyH">CURA</button><button class="touch action" data-key="KeyE">PORTA</button></div>
+</div>
+<div class="info" id="info"></div>
+<footer>Versões para navegador inspiradas nos projetos originais em Python, Java e C++. A execução aqui usa JavaScript e HTML Canvas.</footer>
+</main>
+<script>
+"use strict";
+const c=document.getElementById("game"),g=c.getContext("2d"),over=document.getElementById("over"),st=document.getElementById("stats");
+const G={game:"snake",running:false,paused:false,dead:false,last:0,clock:0,score:0}, keys=new Set();
+const configs={
+snake:{title:"Snake",tag:"PYTHON",sub:"Coma frutas e não bata no próprio corpo",hints:"Setas/WASD: mover a cobrinha",info:"<b>Python · Snake:</b> demonstra listas, variáveis, condições e repetição. Coma os pontos amarelos para crescer. Encostar no corpo ou nas paredes encerra a partida."},
+jump:{title:"Neon Jump",tag:"JAVA",sub:"Corra, pule obstáculos e alcance a chegada",hints:"Espaço / clique / toque: pular · R: reiniciar",info:"<b>Java · Neon Jump:</b> demonstra movimento, gravidade, colisão, classes e atualização por quadros. O quadrado corre automaticamente. Pule os espinhos para completar a fase."},
+rpg:{title:"Crystal Quest",tag:"C++",sub:"Colete 3 cristais, lute e abra o portal",hints:"WASD/setas: andar · Espaço: atacar · H: poção · E: portal",info:"<b>C++ · Crystal Quest:</b> demonstra estados, posições em grade, inteligência simples de inimigos, combate e inventário. Encontre 3 cristais e entre no portal à direita."}};
+function select(which){G.game=which;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset();const u=new URL(location.href);u.searchParams.set("game",which);history.replaceState(null,"",u)}
+function pop(title,msg,btn="JOGAR"){document.getElementById("overlayTitle").textContent=title;document.getElementById("overlayText").textContent=msg;document.getElementById("startBtn").textContent=btn;over.style.display="flex"}
+function hide(){over.style.display="none"}
+function rand(n){return Math.floor(Math.random()*n)}
+function reset(){G.running=false;G.paused=false;G.dead=false;G.score=0;G.clock=0;G.last=0;keys.clear();document.getElementById("pauseBtn").textContent="Ⅱ Pausar";if(G.game==="snake")newSnake();else if(G.game==="jump")newJump();else newRpg();pop(configs[G.game].title,G.game==="snake"?"Coma as frutas amarelas.\nEvite paredes e o próprio corpo!":G.game==="jump"?"Salte por cima dos espinhos.\nA velocidade aumenta com o progresso.":"Colete 3 cristais, derrote monstros e encontre o portal.","INICIAR JOGO");draw()}
+function start(){if(G.dead){reset()}G.running=true;G.paused=false;hide();G.last=performance.now();requestAnimationFrame(frame)}
+function finish(title,msg){G.running=false;G.dead=true;pop(title,msg,"JOGAR NOVAMENTE")}
+function pause(){if(!G.running){if(G.paused){G.paused=false;G.running=true;hide();G.last=performance.now();requestAnimationFrame(frame)}return}G.running=false;G.paused=true;pop("PAUSADO","Seu progresso está preservado.","CONTINUAR")}
+function frame(t){if(!G.running)return;let dt=Math.min((t-G.last||16)/1000,.05);G.last=t;G.clock+=dt;if(G.game==="snake")updateSnake(dt);if(G.game==="jump")updateJump(dt);if(G.game==="rpg")updateRpg(dt);draw();if(G.running)requestAnimationFrame(frame)}
+function bg(){g.fillStyle="#0b1327";g.fillRect(0,0,960,540);g.strokeStyle="#ffffff09";g.lineWidth=1;for(let x=0;x<960;x+=30){g.beginPath();g.moveTo(x,0);g.lineTo(x,540);g.stroke()}for(let y=0;y<540;y+=30){g.beginPath();g.moveTo(0,y);g.lineTo(960,y);g.stroke()}}
+function rect(x,y,w,h,color){g.fillStyle=color;g.fillRect(x,y,w,h)}
+function txt(s,x,y,color="#fff",size=18){g.fillStyle=color;g.font="bold "+size+"px ui-monospace,monospace";g.fillText(s,x,y)}
+// SNAKE
+let sn={};
+function newSnake(){sn={body:[[16,9],[15,9],[14,9]],dir:[1,0],next:[1,0],food:[rand(30),rand(16)],step:0,ate:0};sn.food=nextFood()}
+function nextFood(){let p;do{p=[rand(30),rand(16)]}while(sn.body.some(v=>v[0]===p[0]&&v[1]===p[1]));return p}
+function dirSnake(key){const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d&&(d[0]!==-sn.dir[0]||d[1]!==-sn.dir[1]))sn.next=d}
+function updateSnake(dt){sn.step+=dt;if(sn.step<Math.max(.07,.14-G.score*.002))return;sn.step=0;sn.dir=sn.next;const h=[sn.body[0][0]+sn.dir[0],sn.body[0][1]+sn.dir[1]],eat=h[0]===sn.food[0]&&h[1]===sn.food[1];if(h[0]<0||h[0]>=30||h[1]<0||h[1]>=16||sn.body.slice(0,eat?undefined:-1).some(v=>v[0]===h[0]&&v[1]===h[1])){finish("FIM DE JOGO","Pontos: "+G.score);return}sn.body.unshift(h);if(eat){G.score+=10;sn.food=nextFood()}else sn.body.pop()}
+function drawSnake(){bg();const w=28, ox=60,oy=43;rect(ox-5,oy-5,30*w+10,16*w+10,"#27425b");rect(ox,oy,30*w,16*w,"#102b33");for(let i=0;i<30;i++)for(let j=0;j<16;j++)if((i+j)%2===0)rect(ox+i*w,oy+j*w,w,w,"#14343c");const [fx,fy]=sn.food;g.fillStyle="#ffcd68";g.beginPath();g.arc(ox+fx*w+14,oy+fy*w+14,11+Math.sin(G.clock*5)*2,0,7);g.fill();sn.body.forEach(([x,y],i)=>{rect(ox+x*w+2,oy+y*w+2,w-4,w-4,i===0?"#beff7a":"#4ccf98");if(i===0){rect(ox+x*w+7,oy+y*w+8,4,4,"#12332b");rect(ox+x*w+18,oy+y*w+8,4,4,"#12332b")}});txt("PONTOS "+G.score,60,25,"#d9eff8",15);st.textContent="Pontos: "+G.score}
+// JUMP
+let jp={};
+function newJump(){jp={y:0,vy:0,progress:0,done:false,obstacles:[],particles:[],speed:335};let at=450;for(let i=0;i<29;i++){at+=155+rand(140);jp.obstacles.push({x:at,size:rand(4)===0?48:39})}jp.end=at+270}
+function jump(){if(G.game!=="jump")return;if(!G.running){start();return}if(jp.y>=0){jp.vy=-720;jp.y=-1}}
+function updateJump(dt){jp.speed=330+Math.min(100,jp.progress*.014);jp.progress+=dt*jp.speed;jp.vy+=1800*dt;jp.y+=jp.vy*dt;if(jp.y>=0){jp.y=0;jp.vy=0}const x=165,base=427,box={x:x+4,y:base-43+jp.y,w:35,h:35};for(const o of jp.obstacles){let sx=o.x-jp.progress+x;if(sx>x-80&&sx<x+70&&box.x<sx+o.size-6&&box.x+box.w>sx+6&&box.y+box.h>base-o.size+12){finish("VOCÊ BATEU!","Progresso: "+Math.min(100,Math.floor(jp.progress/jp.end*100))+"%\nTente pular um pouco antes.");return}}if(jp.progress>=jp.end)finish("FASE CONCLUÍDA!","Você chegou ao final do percurso!")}
+function drawJump(){bg();const base=427;g.fillStyle="#0e2441";g.beginPath();g.moveTo(0,base);g.lineTo(960,base);g.lineTo(960,540);g.lineTo(0,540);g.fill();for(let i=0;i<18;i++){let x=((i*115-jp.progress*.18)%1060+1060)%1060;rect(x,70+(i%5)*45,4,4,"#50c4df55")}rect(0,base,960,8,"#42d7ee");for(let i=0;i<22;i++)rect(((i*52-jp.progress)%1100+1100)%1100,440,26,4,"#22506d");for(const o of jp.obstacles){let sx=o.x-jp.progress+165;if(sx<-60||sx>1000)continue;g.fillStyle="#ff6d96";g.beginPath();g.moveTo(sx,base);g.lineTo(sx+o.size/2,base-o.size);g.lineTo(sx+o.size,base);g.closePath();g.fill();g.strokeStyle="#ffd2df";g.lineWidth=3;g.stroke()}g.save();g.translate(185,base-25+jp.y);g.rotate(jp.y<0?jp.progress*.015:0);rect(-20,-20,40,40,"#48def1");rect(-13,-12,10,10,"#132941");rect(5,-12,10,10,"#132941");g.restore();const prog=Math.min(100,Math.round(jp.progress/jp.end*100));rect(30,25,900,10,"#1b354b");rect(30,25,9*prog,10,"#7cecb2");txt("FASE 01  "+prog+"%",30,62,"#b4effd",17);st.textContent="Fase: "+prog+"%"}
+// RPG
+let rp={};const T=40,ox=80,oy=30,tilesX=20,tilesY=12;
+function newRpg(){rp={p:{x:2,y:6,hp:6,max:6,dir:[1,0]},walls:new Set(),monsters:[{x:9,y:2,hp:3},{x:15,y:4,hp:3},{x:11,y:9,hp:3},{x:17,y:10,hp:3}],gems:[{x:4,y:2},{x:12,y:4},{x:15,y:9}],got:0,potions:2,attackAt:0,walkAt:0,enemyAt:0,flash:0};for(let x=0;x<20;x++){rp.walls.add(x+",0");rp.walls.add(x+",11")}for(let y=0;y<12;y++){rp.walls.add("0,"+y);rp.walls.add("19,"+y)}rp.walls.delete("19,6");for(const [x,y] of [[7,2],[7,3],[7,4],[7,5],[3,8],[4,8],[5,8],[12,7],[13,7],[14,7],[16,2],[16,3]])rp.walls.add(x+","+y)}
+function hitWall(x,y){return x<1||x>18||y<1||y>10||rp.walls.has(x+","+y)}
+function moveRpg(dx,dy){if(!G.running)return;rp.p.dir=[dx,dy];let x=rp.p.x+dx,y=rp.p.y+dy;if(x===19&&y===6){exitRpg();return}if(hitWall(x,y))return;rp.p.x=x;rp.p.y=y;let n=rp.gems.findIndex(v=>v.x===x&&v.y===y);if(n>=0){rp.gems.splice(n,1);rp.got+=1;G.score+=100}for(const e of rp.monsters){if(e.x===x&&e.y===y)damage()} }
+function damage(){rp.p.hp--;rp.flash=.25;if(rp.p.hp<=0)finish("HERÓI DERROTADO","Colete cristais, mas evite os monstros!")}
+function attackRpg(){if(!G.running)return;rp.attackAt=.22;let {x,y,dir}=rp.p;for(const e of rp.monsters){if(Math.abs(e.x-x)<=1&&Math.abs(e.y-y)<=1)e.hp-=1}let dead=rp.monsters.filter(v=>v.hp<=0);G.score+=dead.length*40;rp.monsters=rp.monsters.filter(v=>v.hp>0)}
+function potion(){if(rp.potions>0&&rp.p.hp<rp.p.max&&G.running){rp.potions--;rp.p.hp=Math.min(rp.p.max,rp.p.hp+3)}}
+function exitRpg(){if(rp.p.x>=17&&rp.p.y===6&&rp.got===3){finish("MISSÃO COMPLETA!","Você coletou os 3 cristais e escapou!");return}if(rp.p.x>=17&&rp.p.y===6)rp.flash=.2}
+function updateRpg(dt){rp.attackAt=Math.max(0,rp.attackAt-dt);rp.flash=Math.max(0,rp.flash-dt);rp.enemyAt+=dt;rp.walkAt+=dt;if(rp.walkAt>.12){rp.walkAt=0;const dirs=[[0,-1],[0,1],[-1,0],[1,0]];for(const [dx,dy,key] of [[0,-1,"ArrowUp"],[0,1,"ArrowDown"],[-1,0,"ArrowLeft"],[1,0,"ArrowRight"]])if(keys.has(key)){moveRpg(dx,dy);break}}if(rp.enemyAt>.75){rp.enemyAt=0;for(const e of rp.monsters){let dx=Math.sign(rp.p.x-e.x),dy=Math.sign(rp.p.y-e.y);let choices=Math.abs(rp.p.x-e.x)>Math.abs(rp.p.y-e.y)?[[dx,0],[0,dy]]:[[0,dy],[dx,0]];let stepped=false;if(Math.abs(rp.p.x-e.x)+Math.abs(rp.p.y-e.y)<7)for(const [a,b] of choices){if(!stepped&&(a||b)&&!hitWall(e.x+a,e.y+b)){e.x+=a;e.y+=b;stepped=true}}if(e.x===rp.p.x&&e.y===rp.p.y)damage()}}}
+function drawRpg(){bg();for(let y=0;y<12;y++)for(let x=0;x<20;x++){const px=ox+x*T,py=oy+y*T;rect(px,py,T-1,T-1,(x+y)%2?"#21394c":"#263f4d");if(rp.walls.has(x+","+y)){rect(px+2,py+3,36,34,"#52606e");rect(px+5,py+4,31,10,"#657581")}}const px=ox+19*T,py=oy+6*T;rect(px,py,38,38,rp.got===3?"#40e0c4":"#8d71c3");txt("↗",px+8,py+28,"#fff",28);for(const b of rp.gems){let x=ox+b.x*T+20,y=oy+b.y*T+20+Math.sin(G.clock*4+b.x)*3;g.fillStyle="#ffe76e";g.beginPath();g.moveTo(x,y-14);g.lineTo(x+12,y);g.lineTo(x,y+14);g.lineTo(x-12,y);g.closePath();g.fill()}for(const e of rp.monsters){let x=ox+e.x*T+5,y=oy+e.y*T+7;rect(x,y,30,30,"#d3698f");rect(x+4,y-6,7,9,"#f6a6bd");rect(x+19,y-6,7,9,"#f6a6bd");rect(x+7,y+10,5,5,"#16283e");rect(x+19,y+10,5,5,"#16283e");rect(x,y-11,30*e.hp/3,4,"#ff9077")}const x=ox+rp.p.x*T+4,y=oy+rp.p.y*T+4;rect(x+4,y-5,25,12,"#ce985d");rect(x,y+7,32,24,rp.flash>0?"#fff":"#54c7ed");rect(x+7,y+3,18,14,"#ffe0bd");rect(x+17,y+10,4,4,"#142035");if(rp.attackAt>0){g.strokeStyle="#ffe38a";g.lineWidth=5;g.beginPath();g.arc(x+16,y+16,36,-1.1,1.5);g.stroke()}rect(80,512,800,22,"#091826");txt("VIDA "+ "♥".repeat(Math.max(0,rp.p.hp))+"♡".repeat(6-Math.max(0,rp.p.hp))+"   CRISTAIS "+rp.got+"/3   POÇÕES "+rp.potions,96,529,"#eaf3ff",15);st.textContent="Cristais: "+rp.got+"/3  |  Vida: "+rp.p.hp+"/6"}
+function draw(){if(G.game==="snake")drawSnake();if(G.game==="jump")drawJump();if(G.game==="rpg")drawRpg()}
+function control(key){if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")exitRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
+window.addEventListener("keydown",e=>{let k=e.code;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(k))e.preventDefault();if(keys.has(k)&&e.repeat)return;keys.add(k);control(k)});
+window.addEventListener("keyup",e=>keys.delete(e.code));window.addEventListener("blur",()=>keys.clear());
+document.querySelectorAll("[data-key]").forEach(b=>{b.addEventListener("pointerdown",e=>{e.preventDefault();keys.add(b.dataset.key);control(b.dataset.key)});for(const ev of ["pointerup","pointercancel","pointerleave"])b.addEventListener(ev,()=>keys.delete(b.dataset.key))});
+c.addEventListener("pointerdown",e=>{e.preventDefault();if(G.game==="jump")jump();else if(G.game==="rpg")attackRpg()});
+document.getElementById("startBtn").onclick=()=>{if(G.paused){G.paused=false;G.running=true;hide();G.last=performance.now();requestAnimationFrame(frame)}else start()};
+document.getElementById("restartBtn").onclick=()=>{reset();start()};
+document.getElementById("pauseBtn").onclick=()=>{if(G.running||G.paused)pause()};
+document.getElementById("tab-snake").onclick=()=>select("snake");document.getElementById("tab-jump").onclick=()=>select("jump");document.getElementById("tab-rpg").onclick=()=>select("rpg");
+select(["snake","jump","rpg"].includes(new URLSearchParams(location.search).get("game"))?new URLSearchParams(location.search).get("game"):"snake");
+</script>
+</body></html>
