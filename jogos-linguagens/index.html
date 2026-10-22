@@ -741,10 +741,29 @@ function updateRpg(dt){
 }
 function drawRpg(){
   const theme=themes[rp.floor-1],bgc=g.createLinearGradient(0,0,960,540);
-  bgc.addColorStop(0,"#0c182a");bgc.addColorStop(1,"#151f35");rect(0,0,960,540,bgc);
+  const environments=[
+    ["#081d1d","#1b4436"],["#161326","#32344f"],
+    ["#270f1b","#693c39"],["#0a1a32","#344a70"]
+  ];
+  bgc.addColorStop(0,environments[rp.floor-1][0]);
+  bgc.addColorStop(1,environments[rp.floor-1][1]);rect(0,0,960,540,bgc);
+  // Architecture frame: each dungeon retains its own atmosphere.
+  g.save();g.shadowColor=theme[4];g.shadowBlur=25;
+  rect(ox-7,oy-7,814,494,theme[3]);g.restore();
+  rect(ox-4,oy-4,808,488,"#101b2c");
   for(let y=0;y<12;y++)for(let x=0;x<20;x++){
     const px=ox+x*T,py=oy+y*T;
-    rect(px,py,T-1,T-1,(x+y)%2?theme[1]:theme[2]);
+    const c=(x+y)%2?theme[1]:theme[2];
+    rect(px,py,T-1,T-1,c);
+    // Multi-layer stonework, varied by biome. Texturing is deterministic and stable frame-to-frame.
+    if(!rp.walls.has(pos(x,y))){
+      rect(px+2,py+2,35,2,"#ffffff12");
+      rect(px+3,py+35,33,2,"#040b172e");
+      if((x*31+y*19+rp.floor*7)%7===0){
+        rect(px+8,py+19,15,2,"#07141d55");
+        rect(px+14,py+20,2,8,"#0d172533");
+      }
+    }
     if((x*11+y*7)%13===0)rect(px+9,py+15,13,2,"#ffffff15");
     if((x*19+y*7+rp.floor)%17===0){
       rect(px+7,py+30,10,2,"#07132135");
@@ -754,18 +773,69 @@ function drawRpg(){
       rect(px+12,py+11,3,9,theme[4]+"55");rect(px+8,py+14,11,3,theme[4]+"55");
     }
     if(rp.walls.has(pos(x,y))){
-      rect(px+1,py+1,38,38,"#253247");
-      rect(px+2,py+2,36,29,theme[3]);
-      rect(px+4,py+17,31,3,"#283b54");
-      rect(px+17,py+2,3,14,"#3a4d62");
-      rect(px,py+31,39,8,"#253247");
+      // Bricks and 3D beveled walls, with cracks, shadows and irregular highlights.
+      rect(px-1,py,42,40,"#131d2c");
+      rect(px+2,py+1,36,30,theme[3]);
+      rect(px+3,py+2,33,4,"#c8d9ed39");
+      rect(px+3,py+26,34,6,"#1722388a");
+      rect(px,py+30,40,10,"#1a2739");
+      rect(px+6,py+14,33,2,"#1d283f");
+      rect(px+23,py+3,2,11,"#1d283f");
+      rect(px+11,py+16,2,11,"#26354b");
+      if((x+3*y)%5===0){
+        g.strokeStyle="#1d273f";g.lineWidth=1.7;
+        g.beginPath();g.moveTo(px+23,py+8);g.lineTo(px+17,py+14);g.lineTo(px+19,py+21);g.stroke();
+      }
+      if(rp.floor===1&&x%4===0){rect(px+2,py+2,5,8,"#4e8e69");rect(px+9,py+1,6,4,"#367650")}
+      if(rp.floor===3&&y%3===0){rect(px+28,py+26,8,3,"#f5916177")}
     }
   }
+  // Environmental props: animated leaves, mushrooms, bones, embers and magic runes.
+  for(let y=1;y<=10;y++)for(let x=1;x<=18;x++){
+   if(rp.walls.has(pos(x,y)))continue;
+   const k=(x*71+y*137+rp.floor*31)%17;
+   if(k>3)continue;
+   const px=ox+x*T,py=oy+y*T;
+   if(rp.floor===1){
+      // Tufts of grass and lantern mushrooms
+      if(k===0){g.strokeStyle="#6ac58e";g.lineWidth=2;g.beginPath();
+       g.moveTo(px+12,py+29);g.lineTo(px+10,py+21);g.moveTo(px+15,py+29);g.lineTo(px+20,py+20);g.stroke()}
+      if(k===2){
+        rect(px+25,py+20,3,12,"#c9d4b2");
+        g.fillStyle="#91efd3";g.beginPath();g.ellipse(px+26,py+19,8,5,0,0,Math.PI*2);g.fill();
+        rect(px+24,py+19,3,2,"#fafbdc");
+      }
+   }else if(rp.floor===2){
+      // Cracked bones and ancient floor symbols
+      g.strokeStyle="#bbbec4a0";g.lineWidth=2;g.beginPath();
+      g.moveTo(px+8,py+28);g.lineTo(px+20,py+21);g.moveTo(px+17,py+16);g.lineTo(px+21,py+24);g.stroke();
+      if(k===1){g.strokeStyle="#ad88d255";g.beginPath();g.arc(px+23,py+22,8,0,Math.PI*2);g.stroke()}
+   }else if(rp.floor===3){
+      // Cracks of molten lava
+      g.strokeStyle="#ff865d99";g.lineWidth=2;g.beginPath();
+      g.moveTo(px+4,py+28);g.lineTo(px+14,py+18);g.lineTo(px+21,py+23);g.lineTo(px+31,py+11);g.stroke();
+      if(k===0){g.fillStyle="#ffc38b";g.beginPath();g.arc(px+21,py+23,2+Math.sin(G.clock*3+x)*.8,0,Math.PI*2);g.fill()}
+   }else{
+      g.strokeStyle="#8fc6ff6e";g.lineWidth=2;g.beginPath();
+      g.arc(px+20,py+20,9,0,Math.PI*2);g.stroke();
+      rect(px+18,py+7,4,9,"#b3d7ff5c");rect(px+17,py+26,6,5,"#b3d7ff5c");
+   }
+  }
+  // Light columns and haze lend depth without obscuring the grid.
+  g.save();g.globalAlpha=.09;
+  for(let i=0;i<4;i++){
+   const x=100+i*225+Math.sin(G.clock*.35+i)*10;
+   const haze=g.createLinearGradient(x,50,x+110,470);
+   haze.addColorStop(0,theme[4]);haze.addColorStop(1,"#00000000");
+   rect(x,55,104,414,haze);
+  }
+  g.restore();
   for(const [tx,ty] of [[3,2],[11,2],[15,9]]){
     const x=ox+tx*T+15,y=oy+ty*T+12;
     if(rp.walls.has(pos(tx,ty)))continue;
     g.save();g.shadowBlur=11+Math.sin(G.clock*5+tx)*5;g.shadowColor="#ffae64";
-    rect(x,y,8,17,"#af7256");g.fillStyle="#ffc777";g.beginPath();g.ellipse(x+4,y-5,6,9,0,0,7);g.fill();g.restore();
+    rect(x,y,8,17,"#af7256");g.fillStyle=rp.floor===3?"#ff815c":"#ffc777";
+    g.beginPath();g.ellipse(x+4,y-5+Math.sin(G.clock*7+tx)*2,6,9,0,0,7);g.fill();g.restore();
   }
   for(let i=0;i<17;i++){
     const fx=ox+15+(i*53)%755,fy=oy+15+(i*117)%430+Math.sin(G.clock*(1+i%3)*.8+i)*4;
@@ -824,8 +894,28 @@ function drawRpg(){
       g.lineTo(x+39,y+6+flap);g.lineTo(x+37,y+27+flap);
       g.closePath();g.fill();rect(x+9,y+5,14,24,"#cbb2f9");
     }
-    else if(e.type==="guard"){rect(x+2,y+6,29,24,"#b59aa2");rect(x+8,y-4,16,19,"#ded0d5")}
-    else{g.save();g.shadowColor="#d5a9ff";g.shadowBlur=17;rect(x-5,y+7,40,25,"#a671d8");rect(x+1,y-7,29,22,"#d1b5ff");rect(x-3,y-9,9,12,"#f2dcff");rect(x+24,y-9,9,12,"#f2dcff");g.restore()}
+    else if(e.type==="guard"){
+       const walk=Math.sin((e.anim||0)*1.3)*4;
+       rect(x+4,y+25,10,8+walk,"#6a6880");
+       rect(x+19,y+25,10,8-walk,"#6a6880");
+       rect(x+1,y+8,31,19,"#85819b");rect(x+5,y+7,23,20,"#c5b4bf");
+       rect(x+7,y-5,21,17,"#dce0e5");rect(x+10,y+4,16,5,"#41455d");
+       rect(x+10,y+5,4,3,"#ff657c");rect(x+20,y+5,4,3,"#ff657c");
+       rect(x-2,y+11,8,16,"#8a7489");rect(x+29,y+11,8,16,"#8a7489");
+    }
+    else{
+       // Guardian: pulsating armored head, glowing eyes, horns and cloak
+       g.save();g.shadowColor="#b96fff";g.shadowBlur=17+Math.sin(G.clock*5)*4;
+       g.fillStyle="#53347c";g.beginPath();
+       g.moveTo(x+16,y-8);g.lineTo(x-18,y+27);g.lineTo(x+6,y+35);g.lineTo(x+42,y+34);
+       g.lineTo(x+51,y+15);g.closePath();g.fill();
+       rect(x-5,y+5,40,26,"#956aca");
+       rect(x+2,y-9,29,23,"#d1b5ff");rect(x-5,y-16,10,19,"#f2dcff");
+       rect(x+26,y-16,10,19,"#f2dcff");
+       rect(x+8,y+2,7,7,"#fc8bff");rect(x+22,y+2,7,7,"#fc8bff");
+       rect(x+10,y+23,12,6,"#694099");
+       g.restore();
+    }
     rect(x+8,y+14,5,5,"#20223f");rect(x+21,y+14,5,5,"#20223f");
     rect(x-1,y-13,33,4,"#192438");rect(x-1,y-13,33*e.hp/e.max,4,e.type==="boss"?"#db9ffd":"#ff9e8d");
   }
@@ -839,14 +929,34 @@ function drawRpg(){
   g.lineTo(px+9,py+31);g.closePath();g.fill();
   rect(px+4,py+21,9,11+Math.sin(G.clock*10)*2,"#2c5f9a");
   rect(px+21,py+21,9,11-Math.sin(G.clock*10)*2,"#2c5f9a");
-  rect(px+3,py+8,28,25,"#3db7ed");rect(px+6,py-4,23,11,"#ba895f");rect(px+7,py+4,20,13,"#f9d9b8");
+  rect(px+3,py+8,28,25,"#2878b1");
+  rect(px+8,py+9,17,17,"#5fc5ec");rect(px+11,py+12,10,11,"#c3f4ff");
+  rect(px+6,py-4,23,11,"#ba895f");rect(px+7,py+4,20,13,"#f9d9b8");
+  // Shoulder armor / gauntlets / boots with equipment details
+  rect(px+0,py+11,8,11,"#bac7da");rect(px+27,py+11,8,11,"#bac7da");
+  rect(px+7,py+26,10,6,"#e2b17b");rect(px+19,py+26,10,6,"#e2b17b");
+  rect(px+10,py+17,15,3,"#dfedf7");
   rect(px+18,py+9,4,Math.sin(G.clock*2)>.999?1:4,"#19263b");rect(px+3,py+17,7,13,"#4979ad");rect(px+25,py+17,7,13,"#4979ad");
+  // The equipped weapon appears in the hero's hands even when not attacking.
+  g.save();g.translate(px+16,py+17);
+  g.rotate(Math.atan2(rp.p.dir[1],rp.p.dir[0]));
+  const swing=rp.atk>0?Math.sin((1-rp.atk/.32)*Math.PI)*15:0;
+  rect(9,-15-swing,5,25,"#d9f5ff");rect(5,2-swing,14,4,"#ffd493");
+  if(rp.shield>0){g.fillStyle="#a4dcff";g.beginPath();
+   g.moveTo(-12,-10);g.lineTo(-21,-6);g.lineTo(-18,11);g.lineTo(-12,17);g.lineTo(-6,11);g.closePath();g.fill()}
+  g.restore();
   if(rp.atk>0){g.save();g.translate(px+16,py+15);g.rotate(Math.atan2(rp.p.dir[1],rp.p.dir[0]));
     g.shadowColor="#ffe8a5";g.shadowBlur=15;g.strokeStyle="#ffe59d";g.lineWidth=5;g.beginPath();g.arc(0,0,36,-.8,.8);g.stroke();g.restore()}
   if(rp.dashFx>0){g.globalAlpha=rp.dashFx*1.8;rect(px-10,py+7,20,24,theme[4]);g.globalAlpha=1}
   rect(px+7,py-5,5,5,theme[4]);rect(px+13,py-8,8,4,"#f5c98c");
   g.restore();
-  rect(80,511,800,26,"#0c1527");
+  // Action HUD: meters make HP, stamina and power immediately legible.
+  rect(80,494,800,45,"#081525e8");
+  rect(94,501,155,9,"#263347");rect(94,501,155*rp.p.hp/rp.p.max,9,"#f17c8d");
+  rect(258,501,143,9,"#263347");rect(258,501,143*rp.stamina/4,9,"#75e7c6");
+  rect(412,501,105,9,"#263347");rect(412,501,Math.min(105,105*rp.magic/6),9,"#cfa7ff");
+  txt("HP",95,493,"#ffe0e4",12);txt("VIGOR",258,493,"#b0f9e9",12);txt("MAGIA",412,493,"#e2c5ff",12);
+  rect(80,511,800,26,"#0c1527a9");
   txt("VIDA "+rp.p.hp+"/"+rp.p.max+"  ⚔ "+rp.p.damage+"  VIGOR "+rp.stamina.toFixed(1)+"/4"+
       "  MAGIA "+rp.magic+"  ESCUDO "+rp.shield+"  BOTAS "+rp.boots,90,530,"#f1f6ff",14);
   txt("CRISTAIS "+rp.got+"/"+rp.needed+" · POÇÕES "+rp.potions+" · FRAG. "+rp.shards,480,22,"#e0fbff",13);
