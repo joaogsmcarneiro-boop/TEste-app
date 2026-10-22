@@ -175,6 +175,8 @@ function drawSnake(){
  rect(X-1,Y-15,3,7,"#684d33");
  g.fillStyle="#8de6a3";g.beginPath();g.ellipse(X+5,Y-13,7,3,-.4,0,Math.PI*2);g.fill();g.restore();
  const blend=Math.min(1,sn.step/Math.max(.07,.14-G.score*.002));
+ // Gentle traveling ripple across the snake's scales, rather than static shading.
+ const ripple=G.clock*7;
  const pts=sn.body.map((p,i)=>{
   const prev=(sn.prevBody||sn.body)[i]||p;
   return [ox+14+w*(prev[0]+(p[0]-prev[0])*blend),oy+14+w*(prev[1]+(p[1]-prev[1])*blend)];
@@ -189,6 +191,8 @@ function drawSnake(){
   g.strokeStyle="#cdffcc";g.lineWidth=6;g.stroke();g.restore();
  }
  pts.slice(1,-1).forEach(([x,y],i)=>{
+  g.save();g.globalAlpha=.24+Math.abs(Math.sin(ripple-i*.72))*.22;
+  g.fillStyle="#efffc9";g.beginPath();g.ellipse(x-4,y-4,6,2,-.3,0,7);g.fill();g.restore();
   if(i%2===0){g.fillStyle="#c5f9be";g.beginPath();g.arc(x,y,3,0,7);g.fill()}
  });
  if(pts.length){
@@ -471,6 +475,16 @@ function drawJump(){
    g.beginPath();g.arc(x,coin.y+Math.sin(G.clock*5)*4,10,0,7);g.fill();g.restore();
  }
  for(const p of jp.sparks){g.globalAlpha=Math.min(1,p.life*2.3);rect(p.x,p.y,5,5,p.color)}g.globalAlpha=1;
+ // Animated speed streaks and pulsing outlines after the runner accelerates.
+ if(jp.tier>0){
+  g.save();g.globalAlpha=Math.min(.42,.07+jp.tier*.02);
+  g.strokeStyle=scene.accent;g.lineWidth=2;
+  for(let i=0;i<10;i++){
+   const sx=((i*131-jp.progress*.6)%1150+1150)%1150;
+   const sy=100+(i*47)%270;
+   g.beginPath();g.moveTo(sx,sy);g.lineTo(sx-24-jp.tier*3,sy);g.stroke();
+  }g.restore();
+ }
  g.save();g.translate(185,jp.y+19);g.rotate(jp.angle);
  g.shadowColor=scene.accent;g.shadowBlur=16;rect(-19,-19,38,38,scene.accent);g.shadowBlur=0;
  rect(-13,-13,26,26,"#d1faff");rect(-10,-8,7,8,"#22395c");rect(5,-8,7,8,"#22395c");
