@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arcade v5.0 | Snake · Neon Jump · Crystal Quest</title>
+<title>Arcade v6.0 | Snake · Neon Jump · Crystal Quest</title>
 <style>
 :root{--bg:#0a1020;--panel:#141e32;--line:#33445c;--ink:#ecf6ff;--muted:#a6b8d0;--cyan:#4ddbf1;--yellow:#ffdd69;--pink:#fd7597;--green:#84eba1}
 *{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 25% 0%,#1b3456,transparent 42%),#090f1f;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -36,12 +36,83 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 .controlR{display:flex;flex-wrap:wrap;gap:8px}
 .action{width:76px;height:54px;font-size:13px}.info{margin-top:14px;padding:16px 18px;background:#141e32;border:1px solid #344963;border-radius:13px;line-height:1.55;color:#c6d8e9;font-size:14px}
 .info b{color:#fff}footer{margin-top:20px;font-size:12px;color:#96aac4;text-align:center}
-.upgradeChoices{display:grid;gap:8px;margin-top:13px}.upgrade{border:1px solid #6a84ae;background:#253755;color:#fff;border-radius:10px;text-align:left;padding:12px 15px;font-weight:800}.upgrade small{display:block;margin-top:3px;color:#c6d6e8;font-weight:400}.upgrade:hover,.upgrade:active{background:#3a5984}@media(max-width:580px){main{padding:15px 9px 35px}.meta{padding:11px}.canvasWrap{min-height:190px}.overlayBox{padding:15px}.controls{justify-content:center}.toolbar{justify-content:center}.hints{font-size:12px}.pad{grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,45px)}.action{width:66px}}
+.upgradeChoices{display:grid;gap:8px;margin-top:13px}.upgrade{border:1px solid #6a84ae;background:#253755;color:#fff;border-radius:10px;text-align:left;padding:12px 15px;font-weight:800}.upgrade small{display:block;margin-top:3px;color:#c6d6e8;font-weight:400}.upgrade:hover,.upgrade:active{background:#3a5984}
+.cover-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:17px 0 12px}
+.cover-card{padding:0;border:1px solid #446086;border-radius:16px;overflow:hidden;background:#10192d;color:#fff;text-align:left;cursor:pointer;box-shadow:0 14px 34px #0006;transition:transform .18s,border-color .18s,box-shadow .18s;position:relative}
+.cover-card:hover{transform:translateY(-4px);border-color:#8ee9ff;box-shadow:0 17px 40px #0009}
+.cover-card.selected{border-color:#8df4df;box-shadow:0 0 0 2px #5ae8c433,0 18px 40px #0007}
+.cover-img{display:block;width:100%;aspect-ratio:500/325;object-fit:cover;background:#0c1c2d}
+.cover-words{background:linear-gradient(155deg,#182840,#0a1326);padding:10px 14px 13px;display:flex;flex-direction:column;gap:2px}
+.cover-words strong{font-size:clamp(15px,2.2vw,22px);letter-spacing:.02em}
+.cover-words>span:last-child{font-size:12px;color:#b4c9e5}
+.cover-tag{font-size:10px;color:#86e6ef;letter-spacing:.12em;font-weight:800}
+@media(max-width:580px){.cover-gallery{gap:7px}.cover-words{padding:8px}.cover-words strong{font-size:12px}.cover-words>span:last-child{display:none}.cover-tag{font-size:8px}}
+@media(max-width:580px){main{padding:15px 9px 35px}.meta{padding:11px}.canvasWrap{min-height:190px}.overlayBox{padding:15px}.controls{justify-content:center}.toolbar{justify-content:center}.hints{font-size:12px}.pad{grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,45px)}.action{width:66px}}
 </style>
 </head>
 <body>
 <main>
-<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 5.0</b> · PYTHON · JAVA · C++</div></header>
+<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 6.0</b> · PYTHON · JAVA · C++</div></header>
+
+<section class="cover-gallery" aria-label="Escolha seu jogo">
+ <button type="button" class="cover-card" id="cover-snake" aria-label="Jogar Snake">
+   <svg class="cover-img" viewBox="0 0 500 325" role="img" aria-label="Cobra verde em floresta mágica">
+    <defs><linearGradient id="forst" x2="0" y2="1"><stop stop-color="#073528"/><stop offset="1" stop-color="#09200e"/></linearGradient>
+    <radialGradient id="snkGlow"><stop stop-color="#75f4a8" stop-opacity=".6"/><stop offset="1" stop-color="#75f4a8" stop-opacity="0"/></radialGradient>
+    <linearGradient id="snakebody" x2=".6" y2="1"><stop stop-color="#dcff74"/><stop offset=".52" stop-color="#61de78"/><stop offset="1" stop-color="#25895d"/></linearGradient></defs>
+    <rect width="500" height="325" fill="url(#forst)"/><circle cx="245" cy="144" r="158" fill="url(#snkGlow)"/>
+    <path d="M-18 100 Q90 -20 193 42 M500 20 Q380 60 370 175 M-20 290 Q95 202 130 250" stroke="#193d26" stroke-width="31" fill="none"/>
+    <g fill="#277649" opacity=".9"><ellipse cx="66" cy="53" rx="60" ry="18" transform="rotate(31 66 53)"/><ellipse cx="426" cy="45" rx="81" ry="20" transform="rotate(-40 426 45)"/><ellipse cx="61" cy="251" rx="76" ry="20" transform="rotate(20 61 251)"/><ellipse cx="464" cy="256" rx="73" ry="20" transform="rotate(-33 464 256)"/></g>
+    <path d="M128 224 C48 194 96 91 194 118 S306 267 385 207" stroke="#164d34" stroke-width="82" stroke-linecap="round" fill="none"/>
+    <path d="M128 224 C48 194 96 91 194 118 S306 267 385 207" stroke="url(#snakebody)" stroke-width="63" stroke-linecap="round" fill="none"/>
+    <path d="M128 224 C48 194 96 91 194 118 S306 267 385 207" stroke="#bbf88e" stroke-width="16" stroke-linecap="round" opacity=".58" fill="none"/>
+    <ellipse cx="378" cy="192" rx="70" ry="54" transform="rotate(-20 378 192)" fill="#75e981" stroke="#b1ff9f" stroke-width="6"/>
+    <ellipse cx="390" cy="182" rx="21" ry="27" fill="#fff"/><ellipse cx="395" cy="180" rx="12" ry="19" fill="#172d2d"/><circle cx="399" cy="173" r="6" fill="#fff"/>
+    <ellipse cx="352" cy="176" rx="15" ry="22" fill="#fff"/><ellipse cx="355" cy="174" rx="9" ry="15" fill="#172d2d"/><circle cx="358" cy="169" r="4" fill="#fff"/>
+    <path d="M435 213 q24 12 24 23 l12 -7 m-12 7 l10 11" fill="none" stroke="#ff8c9b" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="114" cy="242" r="18" fill="#f44c5f"/><path d="M114 222 l5 -13" stroke="#6c482e" stroke-width="5"/><ellipse cx="128" cy="214" rx="12" ry="6" fill="#83e382" transform="rotate(-30 128 214)"/>
+    <g fill="#d2ffb8" opacity=".7"><circle cx="65" cy="137" r="3"/><circle cx="269" cy="45" r="3"/><circle cx="459" cy="165" r="4"/><circle cx="235" cy="296" r="3"/></g>
+   </svg><div class="cover-words"><span class="cover-tag">PYTHON • ARCADE</span><strong>SNAKE</strong><span>Cobrinha com corpo animado</span></div>
+ </button>
+ <button type="button" class="cover-card" id="cover-jump" aria-label="Jogar Neon Jump">
+   <svg class="cover-img" viewBox="0 0 500 325" role="img" aria-label="Quadrado neon saltando entre plataformas">
+    <defs><linearGradient id="jmpsky" x2=".4" y2="1"><stop stop-color="#270c58"/><stop offset=".6" stop-color="#721c91"/><stop offset="1" stop-color="#0d1440"/></linearGradient>
+    <filter id="jglow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="7"/></filter></defs>
+    <rect width="500" height="325" fill="url(#jmpsky)"/><circle cx="364" cy="68" r="48" fill="#ff7bdb"/><circle cx="364" cy="68" r="67" fill="#ff7bdb" opacity=".24" filter="url(#jglow)"/>
+    <g fill="#1d1956"><rect x="5" y="117" width="58" height="173"/><rect x="74" y="85" width="54" height="205"/><rect x="138" y="137" width="62" height="153"/><rect x="318" y="118" width="54" height="172"/><rect x="386" y="100" width="66" height="190"/></g>
+    <path d="M0 278H160V218H290V250H500" stroke="#ff39fa" stroke-width="11" fill="none" filter="url(#jglow)" opacity=".8"/>
+    <path d="M0 278H160V218H290V250H500" stroke="#f65fff" stroke-width="6" fill="none"/>
+    <path d="M323 249 l17 -42 17 42 M365 249 l17 -42 17 42 M412 249 l17 -42 17 42" stroke="#ff77a2" stroke-width="5" fill="#f94492"/>
+    <g transform="translate(210 140) rotate(-21)"><rect x="-43" y="-43" width="86" height="86" rx="8" stroke="#4bffff" stroke-width="14" fill="#181d5d" filter="url(#jglow)" opacity=".65"/>
+     <rect x="-43" y="-43" width="86" height="86" rx="8" stroke="#6cf7ff" stroke-width="7" fill="#19175b"/>
+     <rect x="-22" y="-13" width="12" height="23" rx="5" fill="#bcffff"/><rect x="12" y="-13" width="12" height="23" rx="5" fill="#bcffff"/>
+     <path d="M-13 22 q13 10 26 0" fill="none" stroke="#bcffff" stroke-width="6" stroke-linecap="round"/></g>
+    <g fill="#74f4ff"><circle cx="102" cy="90" r="4"/><circle cx="281" cy="51" r="4"/><circle cx="441" cy="136" r="3"/><circle cx="58" cy="175" r="2"/></g>
+    <path d="M60 154 l56 -21 M285 180 l49 -20" stroke="#80f6ff" stroke-width="5" opacity=".7"/>
+   </svg><div class="cover-words"><span class="cover-tag">JAVA • PLATAFORMA</span><strong>NEON JUMP</strong><span>Uma vida, desafios infinitos</span></div>
+ </button>
+ <button type="button" class="cover-card" id="cover-rpg" aria-label="Jogar Crystal Quest">
+   <svg class="cover-img" viewBox="0 0 500 325" role="img" aria-label="Herói aventureiro e dragão diante de um castelo">
+    <defs><linearGradient id="rgpSky" x2="0" y2="1"><stop stop-color="#172b4c"/><stop offset="1" stop-color="#6c3d54"/></linearGradient>
+    <radialGradient id="rglow"><stop stop-color="#c597ff" stop-opacity=".9"/><stop offset="1" stop-color="#a154ff" stop-opacity="0"/></radialGradient></defs>
+    <rect width="500" height="325" fill="url(#rgpSky)"/><circle cx="392" cy="168" r="125" fill="url(#rglow)"/>
+    <path d="M0 210 L100 90 L178 128 L235 64 L315 128 L394 61 L500 130 V325 H0Z" fill="#253451"/>
+    <path d="M0 260 L112 193 L191 222 L268 187 L340 219 L500 174V325H0Z" fill="#233e46"/>
+    <g fill="#605267" stroke="#a08c8a" stroke-width="3"><rect x="26" y="64" width="69" height="190"/><rect x="408" y="31" width="71" height="232"/><rect x="61" y="43" width="38" height="36"/><rect x="409" y="12" width="38" height="44"/></g>
+    <g fill="#ffe08c"><rect x="41" y="130" width="14" height="26"/><rect x="433" y="109" width="15" height="25"/></g>
+    <path d="M328 82 Q352 1 429 70 Q472 31 487 68 L442 104 462 132 422 118 393 154 373 110Z" fill="#47285a" stroke="#c066e5" stroke-width="6"/>
+    <path d="M422 118 l50 25 -42 13z" fill="#75479e"/><circle cx="435" cy="92" r="8" fill="#f7a1ff"/>
+    <path d="M180 266 Q140 218 168 169 Q205 144 241 177 Q257 220 216 274Z" fill="#ae3e55"/>
+    <path d="M192 170 l-4 -37 24 -17 22 27 -2 29" fill="#815a43"/>
+    <ellipse cx="211" cy="166" rx="22" ry="24" fill="#f0c29a"/>
+    <path d="M188 157 Q205 109 233 147 L235 159 213 147Z" fill="#533e36"/>
+    <rect x="185" y="195" width="53" height="58" rx="12" fill="#46719b" stroke="#b0dcff" stroke-width="5"/>
+    <path d="M236 215 l87 -103 11 12 -85 113z" fill="#d9eaff" stroke="#74beff" stroke-width="5"/>
+    <path d="M224 230 l29 22" stroke="#ffe2a5" stroke-width="9"/>
+    <g fill="#cb93ff" stroke="#f0dcff" stroke-width="3"><path d="M344 261 l17 -78 25 63 -18 44z"/><path d="M400 260 l18 -101 31 75 -28 50z"/></g>
+   </svg><div class="cover-words"><span class="cover-tag">C++ • ROGUELITE</span><strong>CRYSTAL QUEST</strong><span>Combate, exploração e magia</span></div>
+ </button>
+</section>
 <nav class="tabs" aria-label="Escolher jogo">
 <button type="button" id="tab-snake" class="tab">🐍 Python · Snake</button>
 <button type="button" id="tab-jump" class="tab">⚡ Java · Neon Jump</button>
@@ -67,7 +138,7 @@ const configs={
 snake:{title:"Snake",tag:"PYTHON",sub:"Coma frutas e não bata no próprio corpo",hints:"Setas/WASD: mover a cobrinha",info:"<b>Python · Snake:</b> demonstra listas, variáveis, condições e repetição. Coma os pontos amarelos para crescer. Encostar no corpo ou nas paredes encerra a partida."},
 jump:{title:"Neon Jump ∞ · Vida única",tag:"JAVA",sub:"Plataformas, buracos, anéis, trampolins e obstáculos",hints:"Espaço / toque: pular · toque no ar perto de anéis para impulsionar",info:"<b>Neon Jump:</b> corrida infinita com apenas uma vida. Pule espinhos, caixas e serras; suba em plataformas, evite abismos e use trampolins automáticos. Anéis amarelos podem dar um salto no ar quando você toca neles. Novos obstáculos aparecem sem parar, e a velocidade aumenta a cada 17 segundos."},
 rpg:{title:"Crystal Quest: Roguelite",tag:"C++",sub:"Espadas, escudos, botas e magia · combates com esquiva",hints:"WASD: andar · Espaço: atacar · Shift/K: esquiva · F: magia · H: cura · E: portal",info:"<b>Crystal Quest:</b> agora os itens mudam sua jogabilidade: espada (+dano), escudo (redução do dano), botas (esquiva mais rápida), orbes (+magia), poções (cura) e cristais (recarregam magia). Ataque apenas na direção que estiver olhando. A energia de ataque se recupera ao andar. Fuja das áreas vermelhas de ataque e desvie dos projéteis inimigos. Shift = esquiva e F = raio mágico."}};
-function select(which){G.game=which;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset()}
+function select(which){G.game=which;document.querySelectorAll(".cover-card").forEach(x=>x.classList.toggle("selected",x.id==="cover-"+which));document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset()}
 function pop(title,msg,btn="JOGAR"){document.getElementById("overlayTitle").textContent=title;document.getElementById("overlayText").textContent=msg;document.getElementById("startBtn").textContent=btn;over.style.display="flex"}
 function hide(){over.style.display="none"}
 function rand(n){return Math.floor(Math.random()*n)}
@@ -211,11 +282,42 @@ function jumpDeath(reason){
  "\nPontos: "+G.score+"\nRecorde: "+jp.best);
 }
 function jOverlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
-function hitJump(o){
- if(o.type==="spike")return{x:o.x+11,y:o.y+10,w:24,h:o.h-13};
- if(o.type==="double")return{x:o.x+9,y:o.y+8,w:62,h:o.h-11};
- if(o.type==="saw")return{x:o.x+11,y:o.y+10,w:32,h:36};
- return{x:o.x+6,y:o.y+4,w:o.w-12,h:o.h-7};
+function polygonAgainstRect(triangle,r){
+ // Separating-axis theorem for a triangle and a padded player rectangle.
+ const rectPts=[[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.h],[r.x,r.y+r.h]];
+ const axes=[[1,0],[0,1]];
+ for(let i=0;i<3;i++){
+  let a=triangle[i],b=triangle[(i+1)%3],dx=b[0]-a[0],dy=b[1]-a[1];
+  const len=Math.hypot(dx,dy)||1;axes.push([-dy/len,dx/len]);
+ }
+ for(const [ax,ay] of axes){
+  let minT=Infinity,maxT=-Infinity,minR=Infinity,maxR=-Infinity;
+  for(const p of triangle){const t=p[0]*ax+p[1]*ay;minT=Math.min(minT,t);maxT=Math.max(maxT,t)}
+  for(const p of rectPts){const t=p[0]*ax+p[1]*ay;minR=Math.min(minR,t);maxR=Math.max(maxR,t)}
+  if(maxT<minR+0.01||maxR<minT+0.01)return false;
+ }
+ return true;
+}
+function hitJump(o,box){
+ // Shrink player by three pixels; visual contact happens before death, never earlier.
+ const r={x:box.x+3,y:box.y+3,w:box.w-6,h:box.h-6};
+ if(o.type==="spike"||o.type==="double"){
+  const num=o.type==="double"?2:1,sw=o.w/num;
+  for(let i=0;i<num;i++){
+    const x=o.x+i*sw, inset=2;
+    const tri=[[x+sw/2,o.y+inset],[x+inset,o.y+o.h-inset],[x+sw-inset,o.y+o.h-inset]];
+    if(polygonAgainstRect(tri,r))return true;
+  }
+  return false;
+ }
+ if(o.type==="saw"){
+  const cx=o.x+o.w/2,cy=o.y+o.h/2,radius=20;
+  const px=Math.max(r.x,Math.min(cx,r.x+r.w)),py=Math.max(r.y,Math.min(cy,r.y+r.h));
+  return (cx-px)**2+(cy-py)**2<radius**2;
+ }
+ // Solid obstacles use a slightly smaller visual hitbox.
+ const solid={x:o.x+5,y:o.y+4,w:o.w-10,h:o.h-7};
+ return jOverlap(r,solid);
 }
 function updateJump(dt){
  const oldBottom=jp.y+JSIZE;
@@ -251,11 +353,12 @@ function updateJump(dt){
  const box={x:wx-14,y:jp.y+4,w:28,h:JSIZE-7};
  for(const p of jp.platforms){
    const rect={x:p.x,y:p.y,w:p.w,h:16};
-   if(jOverlap(box,rect)&&!(jp.grounded&&jp.y+JSIZE===p.y)){jumpDeath("Colisão com uma plataforma.");return}
+   if(jOverlap({x:box.x+3,y:box.y+2,w:box.w-6,h:box.h-5},rect)&&
+      !(jp.grounded&&Math.abs(jp.y+JSIZE-p.y)<1)){jumpDeath("Colisão com uma plataforma.");return}
  }
  for(const o of jp.obstacles){
    if(!o.done&&o.x+o.w<wx-15){o.done=true;G.score+=12}
-   if(jOverlap(box,hitJump(o))){jumpDeath("Você atingiu um obstáculo.");return}
+   if(hitJump(o,box)){jumpDeath("Você atingiu um obstáculo.");return}
  }
  for(const coin of jp.coins)if(!coin.used&&Math.hypot(wx-coin.x,jp.y+19-coin.y)<27){
    coin.used=true;G.score+=25;spark(185,jp.y+19,"#ffe5a0",12);
@@ -277,6 +380,17 @@ function drawJump(){
  glow.addColorStop(0,scene.moon+"99");glow.addColorStop(1,scene.moon+"00");
  rect(676,0,200,190,glow);
  g.fillStyle=scene.moon;g.beginPath();g.arc(777,99,30,0,7);g.fill();
+ // Moving curved horizon and neon mountain silhouettes in the distant background
+ for(let layer=0;layer<2;layer++){
+  g.save();g.globalAlpha=layer===0?.34:.27;g.fillStyle=layer===0?"#9f90ed":"#5ab5db";
+  const drift=jp.progress*(layer===0?.055:.12);
+  g.beginPath();g.moveTo(-40,427);
+  for(let i=-1;i<13;i++){
+   const mx=i*112-(drift%112),my=278+layer*30+Math.sin(i*1.91+layer)*43;
+   g.lineTo(mx,my);g.lineTo(mx+55,my-28-layer*7);
+  }
+  g.lineTo(1100,427);g.closePath();g.fill();g.restore();
+ }
  for(let layer=0;layer<3;layer++){
    const offset=jp.progress*[.12,.23,.38][layer]%141;
    for(let i=-2;i<11;i++){
@@ -286,9 +400,21 @@ function drawJump(){
        rect(x+15+k*39,JGROUND-ht+15+j*29,9,13,"#fff5b527");
    }
  }
+ // Atmospheric pulses and depth-lines in the background
+ for(let i=0;i<9;i++){
+   const x=((i*163-jp.progress*.09)%1300+1300)%1300;
+   g.save();g.globalAlpha=.14+Math.sin(G.clock+i)*.045;
+   g.strokeStyle=scene.accent;g.lineWidth=2;
+   g.beginPath();g.arc(x,165+(i%3)*45,25+(i%5)*8,0,Math.PI*2);g.stroke();g.restore();
+ }
  rect(0,JGROUND,960,113,scene.ground);
  g.save();g.shadowColor=scene.accent;g.shadowBlur=9;rect(0,JGROUND-4,960,5,scene.accent);g.restore();
  for(let i=0;i<20;i++){const x=((i*65-jp.progress*.8)%1170+1170)%1170;rect(x,JGROUND+14,30,3,scene.accent+"66")}
+ for(let i=0;i<12;i++){
+  const yy=JGROUND+20+i*9;
+  g.save();g.globalAlpha=.16;g.strokeStyle=scene.accent;g.lineWidth=1;
+  g.beginPath();g.moveTo(0,yy);g.lineTo(960,yy);g.stroke();g.restore();
+ }
  for(const gap of jp.gaps){
    const x=gap.x-jp.progress+185;if(x>1000||x+gap.w<-50)continue;
    rect(x-1,JGROUND-5,gap.w+2,120,"#090f26");
@@ -738,6 +864,9 @@ for(let n=1;n<=3;n++)document.getElementById("upgrade"+n).onclick=()=>chooseUpgr
 document.getElementById("startBtn").onclick=()=>{if(G.paused){G.paused=false;G.running=true;hide();G.last=performance.now();requestAnimationFrame(frame)}else start()};
 document.getElementById("restartBtn").onclick=()=>{reset();start()};
 document.getElementById("pauseBtn").onclick=()=>{if(G.running||G.paused)pause()};
+document.getElementById("cover-snake").onclick=()=>{select("snake");start();};
+document.getElementById("cover-jump").onclick=()=>{select("jump");start();};
+document.getElementById("cover-rpg").onclick=()=>{select("rpg");start();};
 document.getElementById("tab-snake").onclick=()=>select("snake");document.getElementById("tab-jump").onclick=()=>select("jump");document.getElementById("tab-rpg").onclick=()=>select("rpg");
 select(["snake","jump","rpg"].includes(new URLSearchParams(location.search).get("game"))?new URLSearchParams(location.search).get("game"):"snake");
 </script>
