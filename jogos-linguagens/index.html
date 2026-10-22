@@ -600,10 +600,31 @@ function dodgeRpg(){
  for(let i=0;i<2+Math.min(1,rp.boots);i++)if(!rpgStep(rp.p.x+dx,rp.p.y+dy))break;
  announce("ESQUIVA! INVULNERÁVEL POR UM INSTANTE");
 }
+function burstRpg(x,y,color,n=12){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=50+Math.random()*85;rp.fx.push({x:ox+(x+.5)*T,y:oy+(y+.5)*T,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.3+Math.random()*.3,color})}}
+function interactRpg(){
+ if(!G.running)return;
+ const near=o=>Math.abs(o.x-rp.p.x)+Math.abs(o.y-rp.p.y)<=1;
+ const box=rp.chests.find(o=>!o.open&&near(o));
+ if(box){box.open=true;rp.treasures++;G.score+=75;burstRpg(box.x,box.y,"#ffe3a2",18);
+  const k=rand(4);
+  if(k===0){rp.p.damage++;announce("BAÚ: ESPADA +1 DANO")}
+  if(k===1){rp.p.max+=2;rp.p.hp=Math.min(rp.p.max,rp.p.hp+3);announce("BAÚ: +2 VIDA MÁXIMA")}
+  if(k===2){rp.potions+=2;announce("BAÚ: +2 POÇÕES")}
+  if(k===3){rp.magic=Math.min(6,rp.magic+3);rp.shards+=3;announce("BAÚ: MAGIA E FRAGMENTOS")}
+  return;
+ }
+ const altar=rp.altars.find(o=>!o.used&&near(o));
+ if(altar){altar.used=true;rp.p.hp=Math.min(rp.p.max,rp.p.hp+3);rp.fire++;
+   announce("SANTUÁRIO: CURA + ATAQUE ÍGNEO");burstRpg(altar.x,altar.y,"#dfaaff",18);return}
+ exitRpg();
+}
 function defeatMobs(){
  const fallen=rp.mobs.filter(e=>e.hp<=0);
  for(const e of fallen){
-  G.score+=e.type==="boss"?500:50;rp.shards+=e.type==="boss"?10:1;rp.kills++;
+  G.score+=e.type==="boss"?500:e.type==="miniboss"?220:50;
+  rp.shards+=e.type==="boss"?16:e.type==="miniboss"?7:1;rp.kills++;
+  rp.xp++;if(rp.xp>=rp.xpNext){rp.xp=0;rp.p.level++;rp.xpNext+=2;rp.p.max++;rp.p.hp=Math.min(rp.p.max,rp.p.hp+2);announce("SUBIU DE NÍVEL! +VIDA")}
+  burstRpg(e.x,e.y,"#ffe5b8");
   if(Math.random()<.3)rp.items.push({x:e.x,y:e.y,type:Math.random()<.5?"potion":"shard"});
  }
  if(fallen.some(e=>e.type==="boss"))announce("GUARDIÃO DERROTADO!");
@@ -646,7 +667,7 @@ function attackRpg(){
   const rx=e.x-rp.p.x,ry=e.y-rp.p.y;
   const forward=rx*dx+ry*dy,lateral=Math.abs(rx*dy-ry*dx);
   if(forward>=1&&forward<=range&&lateral<=1){
-   e.hp-=rp.p.damage;e.wind=0;count++;
+   e.hp-=rp.p.damage+rp.fire;e.wind=0;count++;
    rp.slashes.push({x:e.x,y:e.y,t:.3,kind:"slash"});
    for(let i=0;i<8;i++){
      const a=i*Math.PI/4;rp.fx.push({x:ox+(e.x+.5)*T,y:oy+(e.y+.5)*T,vx:Math.cos(a)*75,vy:Math.sin(a)*75,life:.35,color:"#ffe2a0"});
@@ -701,6 +722,11 @@ function updateRpg(dt){
  rp.stamina=Math.min(4,rp.stamina+dt*.24);
  for(const f of rp.slashes)f.t-=dt;
  rp.slashes=rp.slashes.filter(f=>f.t>0);
+ rp.trapTick+=dt;
+ for(const t of rp.traps){
+   t.active=Math.sin(rp.trapTick*2+t.phase)>0.3;
+   if(t.active&&t.x===rp.p.x&&t.y===rp.p.y)damage(1);
+ }
  for(const b of rp.bolts){
   b.x+=b.vx*dt;b.y+=b.vy*dt;b.t-=dt;
   if(Math.hypot(b.x-rp.p.x,b.y-rp.p.y)<.5){damage(b.power);b.t=-1}
@@ -851,6 +877,23 @@ function drawRpg(){
     g.globalAlpha=.15+Math.abs(Math.sin(G.clock+i))*.18;
     rect(fx,fy,3,3,theme[4]);
   }g.globalAlpha=1;
+  for(const t of rp.traps){
+    const x=ox+t.x*T,y=oy+t.y*T;
+    rect(x+3,y+3,34,34,t.active?"#963f58":"#46405b");
+    if(t.active){g.fillStyle="#ff8b9b";g.beginPath();g.moveTo(x+20,y+5);g.lineTo(x+33,y+33);g.lineTo(x+7,y+33);g.closePath();g.fill()}
+  }
+  for(const a of rp.altars){
+    const x=ox+a.x*T+20,y=oy+a.y*T+20;
+    g.save();g.shadowColor="#c7a0ff";g.shadowBlur=a.used?0:16;
+    rect(x-11,y-5,22,22,a.used?"#666080":"#b59af0");
+    g.fillStyle="#f4e6ff";g.beginPath();g.arc(x,y-8+Math.sin(G.clock*4)*3,7,0,7);g.fill();g.restore();
+  }
+  for(const b of rp.chests){
+    const x=ox+b.x*T+3,y=oy+b.y*T+10;
+    rect(x,y+10,34,22,"#523b2d");
+    rect(x+2,y+3,30,17,b.open?"#70503b":"#bd8554");
+    rect(x+14,y+7,7,10,"#ffe1a0");
+  }
   const xPortal=ox+19*T,yPortal=oy+6*T;
   g.save();g.shadowBlur=25;g.shadowColor=portalReady()?"#62edb9":"#a889ff";
   rect(xPortal-2,yPortal,42,40,portalReady()?"#55deb8":"#9163cc");
@@ -903,6 +946,9 @@ function drawRpg(){
       g.lineTo(x+39,y+6+flap);g.lineTo(x+37,y+27+flap);
       g.closePath();g.fill();rect(x+9,y+5,14,24,"#cbb2f9");
     }
+    else if(e.type==="wisp"){g.save();g.shadowColor="#8bdcff";g.shadowBlur=18;g.fillStyle="#a7eaff";g.beginPath();g.arc(x+16,y+14,12+Math.sin(G.clock*5)*3,0,7);g.fill();g.restore()}
+    else if(e.type==="frost"){rect(x+1,y+8,32,24,"#6bc5df");rect(x+8,y-4,20,18,"#dbfcff");rect(x+12,y+13,12,7,"#305b80")}
+    else if(e.type==="charger"){rect(x+1,y+7,32,25,"#e09e66");rect(x+7,y-6,9,17,"#fff2bd");rect(x+25,y-6,9,17,"#fff2bd");rect(x+10,y+13,16,7,"#783e3e")}
     else if(e.type==="guard"){
        const walk=Math.sin((e.anim||0)*1.3)*4;
        rect(x+4,y+25,10,8+walk,"#6a6880");
@@ -969,12 +1015,12 @@ function drawRpg(){
   txt("VIDA "+rp.p.hp+"/"+rp.p.max+"  ⚔ "+rp.p.damage+"  VIGOR "+rp.stamina.toFixed(1)+"/4"+
       "  MAGIA "+rp.magic+"  ESCUDO "+rp.shield+"  BOTAS "+rp.boots,90,530,"#f1f6ff",14);
   txt("CRISTAIS "+rp.got+"/"+rp.needed+" · POÇÕES "+rp.potions+" · FRAG. "+rp.shards,480,22,"#e0fbff",13);
-  txt("ANDAR "+rp.floor+"/4 · "+theme[0]+" · NV "+rp.p.level,81,21,theme[4],16);
+  txt("ANDAR "+rp.floor+"/"+RPG_FINAL_FLOOR+" · "+theme[0]+" · NV "+rp.p.level,81,21,theme[4],16);
   if(rp.noteTime>0){rect(280,44,440,41,"#122039eb");txt(rp.note,292,70,"#ffe9b4",17)}
-  st.textContent="Andar "+rp.floor+"/4 · ♥ "+rp.p.hp+"/"+rp.p.max+" · Cristais "+rp.got+"/"+rp.needed;
+  st.textContent="Andar "+rp.floor+"/"+RPG_FINAL_FLOOR+" · ♥ "+rp.p.hp+"/"+rp.p.max+" · Cristais "+rp.got+"/"+rp.needed;
 }
 function draw(){if(G.game==="snake")drawSnake();if(G.game==="jump")drawJump();if(G.game==="rpg")drawRpg()}
-function control(key){if(G.game==="rpg"&&rp.choosing){if(["Digit1","Digit2","Digit3"].includes(key))chooseUpgrade(Number(key.slice(-1)));return}if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")exitRpg();else if(key==="ShiftLeft"||key==="ShiftRight"||key==="KeyK")dodgeRpg();else if(key==="KeyF")spellRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
+function control(key){if(G.game==="rpg"&&rp.choosing){if(["Digit1","Digit2","Digit3"].includes(key))chooseUpgrade(Number(key.slice(-1)));return}if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")interactRpg();else if(key==="ShiftLeft"||key==="ShiftRight"||key==="KeyK")dodgeRpg();else if(key==="KeyF")spellRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
 window.addEventListener("keydown",e=>{let k=e.code;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space","ShiftLeft","ShiftRight"].includes(k))e.preventDefault();if(keys.has(k)&&e.repeat)return;keys.add(k);control(k)});
 window.addEventListener("keyup",e=>keys.delete(e.code));window.addEventListener("blur",()=>keys.clear());
 document.querySelectorAll("[data-key]").forEach(b=>{b.addEventListener("pointerdown",e=>{e.preventDefault();keys.add(b.dataset.key);control(b.dataset.key)});for(const ev of ["pointerup","pointercancel","pointerleave"])b.addEventListener(ev,()=>keys.delete(b.dataset.key))});
