@@ -252,6 +252,12 @@ function drawJump(){
  let sky=g.createLinearGradient(0,0,0,540);
  sky.addColorStop(0,scene.sky[0]);sky.addColorStop(.62,scene.sky[1]);sky.addColorStop(1,scene.sky[2]);
  rect(0,0,960,540,sky);
+ // Animated sky: shooting stars, drifting dust and layered lighting
+ for(let i=0;i<5;i++){
+  const x=(i*257-G.clock*(24+i*9))%1250+80,y=30+i*56+Math.sin(G.clock*.5+i)*12;
+  g.save();g.globalAlpha=.12+i*.028;g.strokeStyle="#e5f7ff";g.lineWidth=2;
+  g.beginPath();g.moveTo(x,y);g.lineTo(x-35,y+11);g.stroke();g.restore();
+ }
  // Twinkling sky and floating atmospheric particles.
  for(let i=0;i<58;i++){
    const x=(i*157+61)%960,y=(i*79+13)%310;
@@ -273,6 +279,12 @@ function drawJump(){
        if((i+row+col)%3!==0)
          rect(x+13+col*29,base-h+15+row*30,7,12,layer===1?"#ffe7ae35":"#96dfff35");
    }
+ }
+ // Foreground silhouettes and floor reflections give the endless scene more depth.
+ for(let i=0;i<8;i++){
+  const x=((i*195-jp.progress*.23)%1300+1300)%1300;
+  rect(x,base-16,45,16,scene.front);
+  rect(x+7,base-24,10,8,scene.front);
  }
  rect(0,base,960,113,scene.ground);
  g.save();g.shadowColor=scene.accent;g.shadowBlur=9;rect(0,base-4,960,5,scene.accent);g.restore();
@@ -339,7 +351,9 @@ function drawJump(){
  rect(-21,-21,42,42,scene.accent);g.shadowBlur=0;
  rect(-15,-15,30,30,"#d5ffff");
  rect(-10,-8,7,9,"#222e56");rect(6,-8,7,9,"#222e56");
- rect(-4,7,10,3,"#2f597a");g.restore();
+ rect(-4,7,10,3,"#2f597a");
+ rect(-17,5,7,5,"#fb8dba");rect(10,5,7,5,"#fb8dba");
+ rect(-15,-17,30,3,"#ffffff8a");g.restore();
  // Telegraph next jump; hazard type varied.
  const coming=jp.obstacles.find(o=>o.x-jp.progress>0);
  if(coming&&coming.x-jp.progress<330&&coming.x-jp.progress>78&&jp.y===0){
