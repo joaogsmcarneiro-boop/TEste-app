@@ -2,58 +2,111 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arcade v8.0 | Snake · Neon Jump · Crystal Quest</title>
+<title>Arcade das Linguagens V9 | Escolha e Jogue</title>
 <style>
-:root{--bg:#0a1020;--panel:#141e32;--line:#33445c;--ink:#ecf6ff;--muted:#a6b8d0;--cyan:#4ddbf1;--yellow:#ffdd69;--pink:#fd7597;--green:#84eba1}
-*{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 25% 0%,#1b3456,transparent 42%),#090f1f;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-main{max-width:1050px;margin:0 auto;padding:25px 17px 50px}
-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px}
-small,.muted{color:var(--muted)}h1{font-size:clamp(24px,4vw,36px);margin:3px 0 0;letter-spacing:-.8px}
-mark{background:transparent;color:var(--cyan)}.mini{font-size:12px;letter-spacing:.17em;color:var(--green);font-weight:800}
-.pill{border:1px solid #526885;border-radius:25px;color:#c1d6ed;padding:9px 14px;font-size:12px}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:20px 0 15px}
-button{font:inherit;cursor:pointer}
-.tab{border:1px solid #344962;background:#182640;color:#d3e4f6;padding:13px 7px;border-radius:12px;transition:.2s;font-size:clamp(12px,2.2vw,16px);font-weight:750}
-.tab.active{border-color:#5de9f6;background:#12374a;box-shadow:0 0 25px #10d2ec22;color:white}
- .stage{border-radius:18px;overflow:hidden;border:1px solid #344963;background:#0b1224;box-shadow:0 22px 55px #0005}
-.meta{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px;background:#17243a;border-bottom:1px solid #2c405c}
-.gameTitle{font-size:19px;font-weight:800}.tag{font-size:12px;color:#f9d773;margin-left:8px}
-.sub{font-size:13px;color:#b3c6dc}.stats{font-size:15px;color:#fce19b;font-weight:bold}
-.canvasWrap{position:relative;display:flex;align-items:center;justify-content:center;background:#0a1224;touch-action:none}
-canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;image-rendering:pixelated;touch-action:none}
-.over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#050a18bd;z-index:2;padding:22px}
-.overlayBox{text-align:center;border:1px solid #5f7597;background:#12233eea;box-shadow:0 20px 45px #0008;border-radius:18px;padding:26px 35px;max-width:460px}
-.overlayBox strong{display:block;font-size:clamp(24px,4vw,35px);margin-bottom:10px}
-.overlayBox p{line-height:1.45;color:#c3d6e9;white-space:pre-line}
-.primary{border:none;border-radius:10px;padding:13px 24px;background:#38ccdd;color:#051326;font-weight:900}
-.toolbar{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;background:#17243a}
-.hints{color:#c0d3e8;font-size:13px}.buttons{display:flex;gap:8px}
-.smBtn{background:#293d5a;color:#fff;border:1px solid #45627f;padding:9px 13px;border-radius:8px}
-.controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+:root{color-scheme:dark;--bg:#080e19;--panel:#121d30;--ink:#f4f7ff;--muted:#9cabc4;--line:#30425d;--cyan:#7de6f5;--green:#84eba1;--purple:#c29aff;--yellow:#f9cd81}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0;min-height:100%;background:#070d17;color:var(--ink);font-family:'DM Sans',Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+body{background:radial-gradient(ellipse 80% 43% at 16% -7%,#17395899,transparent 80%),radial-gradient(ellipse 65% 36% at 89% 10%,#3d23575a,transparent 75%),linear-gradient(#09111d,#070d17 70%);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.12;background-image:linear-gradient(#88b4df10 1px,transparent 1px),linear-gradient(90deg,#88b4df10 1px,transparent 1px);background-size:54px 54px}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid #c1faff;outline-offset:3px}
+main{position:relative;max-width:1190px;margin:auto;padding:28px 24px 56px;z-index:1}
+small,.muted{color:var(--muted)}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin:0 0 21px}
+h1,h2,.gameTitle,.cover-words strong{font-family:'Space Grotesk',system-ui,sans-serif}
+h1{font-size:clamp(30px,4.2vw,52px);line-height:1.1;letter-spacing:-.065em;margin:10px 0 11px;font-weight:700}
+mark{background:transparent;color:var(--cyan)}
+.mini{font-weight:800;color:#8df5e5;font-size:11px;letter-spacing:.19em}
+.pill{display:flex;align-items:center;gap:9px;border:1px solid #4e6685;border-radius:100px;color:#d7e6f8;padding:12px 15px;font-size:12px;background:#14253d8c;box-shadow:inset 0 1px #ffffff14}
+.pill b{color:#a2ffda}
+.hero-copy{display:block;max-width:600px;line-height:1.6;color:#aebed5;font-size:15px}
+.hero-top{max-width:700px}
+.headline-accent{display:inline-block;padding:2px 10px;border-radius:8px;background:#223b55;color:#c5f7ff;font-size:11px;letter-spacing:.09em}
+.hub-label{display:flex;justify-content:space-between;align-items:end;gap:10px;margin:25px 0 12px}
+.hub-label h2{margin:0;font-size:clamp(19px,2.6vw,24px);letter-spacing:-.035em}
+.hub-label p{margin:3px 0 0;color:#93aac7;font-size:13px}
+.hub-numeral{font:700 11px 'Space Grotesk',sans-serif;color:#95b1cf;letter-spacing:.18em}
+.cover-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0 0 17px}
+.cover-card{--accent:#75eeb4;padding:0;border:1px solid #38536e;border-radius:19px;overflow:hidden;position:relative;isolation:isolate;color:#fff;text-align:left;background:#121e2d;box-shadow:0 18px 34px #02071577;transform:translateZ(0);transition:transform .28s cubic-bezier(.2,.85,.2,1),border-color .25s,box-shadow .25s}
+#cover-jump{--accent:#75e7ff}#cover-rpg{--accent:#c5a5ff}
+.cover-card:hover{transform:translateY(-7px);border-color:var(--accent);box-shadow:0 19px 43px #020713ad,0 0 26px color-mix(in srgb,var(--accent),transparent 87%)}
+.cover-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent),transparent 70%),0 19px 40px #020713a6}
+.cover-card:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:18px;box-shadow:inset 0 1px 0 #ffffff5a;z-index:3}
+.cover-img{display:block;width:100%;height:auto;aspect-ratio:500/325;object-fit:cover;overflow:hidden;background:#0e1c2b;transition:transform .55s cubic-bezier(.2,.8,.2,1),filter .4s}
+.cover-card:hover .cover-img{transform:scale(1.075);filter:saturate(1.13) contrast(1.07)}
+.cover-card .cover-img .floating{animation:float-cover 3.1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.cover-card .cover-img .sparkle{animation:sparkle 1.5s ease-in-out infinite alternate;transform-origin:center}
+.cover-card .cover-img .turn{animation:slow-spin 10s linear infinite;transform-box:fill-box;transform-origin:center}
+.cover-card .cover-img .wave{animation:float-cover 2.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.cover-words{display:flex;align-items:start;flex-direction:column;gap:6px;padding:15px 16px 18px;background:linear-gradient(125deg,#19273b,#101828);border-top:1px solid #ffffff12;min-height:124px}
+.cover-words strong{font-size:clamp(20px,2.8vw,29px);letter-spacing:-.055em;line-height:1.12}
+.cover-words>span:last-child{font-size:12px;color:#b5c3da;line-height:1.35}
+.cover-tag{font-size:10px;font-weight:800;letter-spacing:.16em;color:var(--accent)}
+.cover-play{position:absolute;right:13px;bottom:22px;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent),#0d1b2b 65%);border:1px solid color-mix(in srgb,var(--accent),transparent 32%);color:#fff;font-size:17px;font-weight:800;z-index:2;transition:transform .25s,background .25s}
+.cover-card:hover .cover-play{transform:scale(1.12);background:color-mix(in srgb,var(--accent),#0d1b2b 42%)}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#101b2d;border:1px solid #2c415b;padding:5px;gap:5px;border-radius:14px;margin:0 0 15px}
+.tab{min-width:0;border:1px solid transparent;color:#aec3dd;background:transparent;padding:12px 9px;border-radius:10px;font-size:13px;font-weight:800;transition:.2s}
+.tab:hover{color:white;background:#1b2d48}
+.tab.active{color:#f8feff;background:linear-gradient(115deg,#26415c,#213354);border-color:#537b96;box-shadow:0 4px 20px #0004}
+.stage{--game-accent:#79e6a1;border-radius:21px;overflow:hidden;border:1px solid #405572;background:#091222;box-shadow:0 25px 60px #020613a0;position:relative}
+body[data-game="jump"] .stage{--game-accent:#7adeff}body[data-game="rpg"] .stage{--game-accent:#c7a3ff}
+.meta{padding:18px 21px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:linear-gradient(100deg,#17283e,#111c30);border-bottom:1px solid #384e6b}
+.gameTitle{font-size:22px;font-weight:700;letter-spacing:-.035em}
+.tag{font-size:10px;letter-spacing:.13em;font-weight:800;background:color-mix(in srgb,var(--game-accent),transparent 84%);border:1px solid color-mix(in srgb,var(--game-accent),transparent 60%);padding:5px 8px;border-radius:7px;color:var(--game-accent);margin-left:10px;vertical-align:middle}
+.sub{font-size:13px;color:#a9bfdc;margin-top:5px}
+.stats{font-size:13px;font-weight:800;color:#f7e1ae;background:#1f2e44;border:1px solid #4a607c;padding:11px 14px;border-radius:9px;font-variant-numeric:tabular-nums}
+.canvasWrap{position:relative;display:flex;align-items:center;justify-content:center;background:#071322;touch-action:none;overflow:hidden}
+canvas{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:16/9;image-rendering:auto;touch-action:none}
+.over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(125deg,#040919db,#0b1530c9);z-index:2;padding:18px;backdrop-filter:blur(4px)}
+.overlayBox{position:relative;overflow:hidden;text-align:center;border:1px solid #5c7a9a;background:linear-gradient(143deg,#223653f0,#121d35f8);box-shadow:0 18px 60px #0009,inset 0 1px #ffffff20;border-radius:18px;padding:28px 31px;max-width:485px;width:min(100%,485px);animation:popin .25s ease-out}
+.overlayBox:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,#7df4c0,#79dfff,#cf9ffb)}
+.overlayBox strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:clamp(23px,4vw,34px);letter-spacing:-.04em}
+.overlayBox p{line-height:1.55;font-size:14px;color:#cfddf0;white-space:pre-line}
+.primary{border:none;border-radius:11px;padding:14px 27px;background:linear-gradient(110deg,#69e2ee,#8ce7c2);color:#08192a;font-weight:900;box-shadow:0 6px 22px #79dfe541;transition:transform .17s,filter .17s}
+.primary:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.toolbar{padding:15px 19px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#14243b;border-top:1px solid #3d5370}
+.hints{color:#bdd2e9;font-size:12px;line-height:1.5;max-width:680px}
+.buttons{display:flex;gap:8px}
+.smBtn{background:#263e58;color:#e5f3ff;border:1px solid #4d6885;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:750}
+.smBtn:hover{background:#385371}
+.controls{border:1px solid #304663;background:#101d30;border-radius:17px;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:13px;flex-wrap:wrap}
 .pad{display:grid;grid-template-columns:repeat(3,53px);grid-template-rows:repeat(2,49px);gap:5px}
-.touch{border:1px solid #486481;background:#243754;border-radius:10px;color:white;font-size:19px;font-weight:800;touch-action:none;user-select:none;-webkit-user-select:none}
-.touch:active{background:#3c6e9a}
-.controlR{display:flex;flex-wrap:wrap;gap:8px}
-.action{width:76px;height:54px;font-size:13px}.info{margin-top:14px;padding:16px 18px;background:#141e32;border:1px solid #344963;border-radius:13px;line-height:1.55;color:#c6d8e9;font-size:14px}
-.info b{color:#fff}footer{margin-top:20px;font-size:12px;color:#96aac4;text-align:center}
-.upgradeChoices{display:grid;gap:8px;margin-top:13px}.upgrade{border:1px solid #6a84ae;background:#253755;color:#fff;border-radius:10px;text-align:left;padding:12px 15px;font-weight:800}.upgrade small{display:block;margin-top:3px;color:#c6d6e8;font-weight:400}.upgrade:hover,.upgrade:active{background:#3a5984}
-.cover-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:17px 0 12px}
-.cover-card{padding:0;border:1px solid #446086;border-radius:16px;overflow:hidden;background:#10192d;color:#fff;text-align:left;cursor:pointer;box-shadow:0 14px 34px #0006;transition:transform .18s,border-color .18s,box-shadow .18s;position:relative}
-.cover-card:hover{transform:translateY(-4px);border-color:#8ee9ff;box-shadow:0 17px 40px #0009}
-.cover-card.selected{border-color:#8df4df;box-shadow:0 0 0 2px #5ae8c433,0 18px 40px #0007}
-.cover-img{display:block;width:100%;aspect-ratio:500/325;object-fit:cover;background:#0c1c2d}
-.cover-words{background:linear-gradient(155deg,#182840,#0a1326);padding:10px 14px 13px;display:flex;flex-direction:column;gap:2px}
-.cover-words strong{font-size:clamp(15px,2.2vw,22px);letter-spacing:.02em}
-.cover-words>span:last-child{font-size:12px;color:#b4c9e5}
-.cover-tag{font-size:10px;color:#86e6ef;letter-spacing:.12em;font-weight:800}
-@media(max-width:580px){.cover-gallery{gap:7px}.cover-words{padding:8px}.cover-words strong{font-size:12px}.cover-words>span:last-child{display:none}.cover-tag{font-size:8px}}
-@media(max-width:580px){main{padding:15px 9px 35px}.meta{padding:11px}.canvasWrap{min-height:190px}.overlayBox{padding:15px}.controls{justify-content:center}.toolbar{justify-content:center}.hints{font-size:12px}.pad{grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,45px)}.action{width:66px}}
+.touch{border:1px solid #55718b;background:linear-gradient(#304760,#25394f);border-radius:11px;color:#f4fdff;font-size:19px;font-weight:800;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:inset 0 1px #ffffff1e;transition:transform .1s,background .1s}
+.touch:active{background:#47789a;transform:scale(.94)}
+.controlR{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.action{min-width:67px;width:auto;padding:0 10px;height:48px;font-size:11px}
+body[data-game="jump"] .pad,body[data-game="jump"] .controlR [data-key]:not([data-key="Space"]){display:none}
+body[data-game="snake"] .controlR{display:none}
+body[data-game="jump"] .controls{justify-content:center}
+body[data-game="jump"] .controlR [data-key="Space"]{font-size:15px;width:190px;height:56px;background:linear-gradient(135deg,#287e99,#395ba2)}
+.info{margin-top:13px;padding:17px 20px;background:#101d30;border:1px solid #304662;border-radius:14px;line-height:1.65;color:#b8cbe2;font-size:13px}
+.info b{color:#ecf9ff}
+footer{margin-top:22px;font-size:11px;color:#8a9cb4;text-align:center;line-height:1.6}
+.upgradeChoices{display:grid;gap:9px;margin-top:14px}
+.upgrade{border:1px solid #7083ad;background:#263957;color:#fff;border-radius:9px;text-align:left;padding:11px 14px;font-weight:800}
+.upgrade small{display:block;margin-top:4px;color:#c4d7eb;font-weight:400}
+.upgrade:hover,.upgrade:active{background:#37517f}
+.version-line{display:flex;justify-content:space-between;align-items:center;color:#9eb4cb;font-size:11px;margin-bottom:8px;letter-spacing:.07em}
+.version-line .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#92f5c3;box-shadow:0 0 9px #88f7ba;margin-right:6px}
+.game-description{color:#c7d6e9}
+@keyframes popin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes float-cover{0%,100%{transform:translateY(0px) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
+@keyframes sparkle{from{opacity:.3;transform:scale(.72)}to{opacity:1;transform:scale(1.2)}}
+@keyframes slow-spin{to{transform:rotate(360deg)}}
+@media(min-width:1100px){.cover-words{min-height:118px}}
+@media(max-width:800px){main{padding:21px 14px 35px}.cover-gallery{gap:9px}.cover-words{padding:13px 12px 15px;min-height:111px}.cover-words strong{font-size:19px}.cover-play{right:8px;bottom:11px;width:28px;height:28px}.cover-words>span:last-child{font-size:10px}.meta{padding:13px}}
+@media(max-width:530px){main{padding:13px 9px 32px}h1{font-size:34px}.hero-copy{font-size:13px}.pill{font-size:10px;padding:9px 11px}.cover-gallery{gap:6px}.cover-card{border-radius:12px}.cover-words{padding:10px 7px 12px;gap:4px;min-height:81px}.cover-words strong{font-size:14px}.cover-tag{font-size:8px;letter-spacing:.05em}.cover-words>span:last-child{display:none}.cover-play{right:6px;bottom:8px;width:22px;height:22px;font-size:12px;border-radius:6px}.tab{font-size:11px;padding:10px 4px}.meta{padding:11px}.gameTitle{font-size:17px}.tag{font-size:8px;margin-left:5px}.stats{font-size:11px;padding:7px 9px}.sub{font-size:11px}.toolbar{padding:12px}.controls{padding:9px;justify-content:center}.pad{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(2,45px)}.touch{font-size:16px}.action{height:42px;font-size:10px}.over{padding:10px}.overlayBox{padding:20px 13px}.overlayBox p{font-size:12px}.overlayBox strong{font-size:22px}.info{padding:14px;font-size:12px}.hub-numeral{display:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <main>
-<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 8.0</b> · PYTHON · JAVA · C++</div></header>
+<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><span class="hero-copy">Três universos jogáveis. Explore o clássico Snake, tente sobreviver ao Neon Jump e conquiste as masmorras de Crystal Quest.</span></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 9.0</b> · PYTHON · JAVA · C++</div></header>
 
+<div class="hub-label"><div><div class="mini">ESCOLHA SEU UNIVERSO</div><h2>Selecione um jogo</h2><p>Clique na capa para começar, ou use as abas abaixo.</p></div><div class="hub-numeral">01 / 03 JOGOS</div></div>
 <section class="cover-gallery" aria-label="Escolha seu jogo">
  <button type="button" class="cover-card" id="cover-snake" aria-label="Jogar Snake">
    <svg class="cover-img" viewBox="0 0 500 325" role="img" aria-label="Cobra verde em floresta mágica">
@@ -72,7 +125,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
     <path d="M435 213 q24 12 24 23 l12 -7 m-12 7 l10 11" fill="none" stroke="#ff8c9b" stroke-width="5" stroke-linecap="round"/>
     <circle cx="114" cy="242" r="18" fill="#f44c5f"/><path d="M114 222 l5 -13" stroke="#6c482e" stroke-width="5"/><ellipse cx="128" cy="214" rx="12" ry="6" fill="#83e382" transform="rotate(-30 128 214)"/>
     <g fill="#d2ffb8" opacity=".7"><circle cx="65" cy="137" r="3"/><circle cx="269" cy="45" r="3"/><circle cx="459" cy="165" r="4"/><circle cx="235" cy="296" r="3"/></g>
-   </svg><div class="cover-words"><span class="cover-tag">PYTHON • ARCADE</span><strong>SNAKE</strong><span>Cobrinha com corpo animado</span></div>
+   </svg><span class="cover-play">▶</span><div class="cover-words"><span class="cover-tag">PYTHON • ARCADE</span><strong>SNAKE</strong><span>Cobrinha com corpo animado</span></div>
  </button>
  <button type="button" class="cover-card" id="cover-jump" aria-label="Jogar Neon Jump">
    <svg class="cover-img" viewBox="0 0 500 325" role="img" aria-label="Quadrado neon saltando entre plataformas">
@@ -89,7 +142,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
      <path d="M-13 22 q13 10 26 0" fill="none" stroke="#bcffff" stroke-width="6" stroke-linecap="round"/></g>
     <g fill="#74f4ff"><circle cx="102" cy="90" r="4"/><circle cx="281" cy="51" r="4"/><circle cx="441" cy="136" r="3"/><circle cx="58" cy="175" r="2"/></g>
     <path d="M60 154 l56 -21 M285 180 l49 -20" stroke="#80f6ff" stroke-width="5" opacity=".7"/>
-   </svg><div class="cover-words"><span class="cover-tag">JAVA • PLATAFORMA</span><strong>NEON JUMP</strong><span>Uma vida, desafios infinitos</span></div>
+   </svg><span class="cover-play">▶</span><div class="cover-words"><span class="cover-tag">JAVA • PLATAFORMA</span><strong>NEON JUMP</strong><span>Uma vida, desafios infinitos</span></div>
  </button>
  <button type="button" class="cover-card" id="cover-rpg" aria-label="Jogar Crystal Quest">
    <svg class="cover-img" viewBox="0 0 500 325" role="img" aria-label="Herói aventureiro e dragão diante de um castelo">
@@ -110,13 +163,14 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
     <path d="M236 215 l87 -103 11 12 -85 113z" fill="#d9eaff" stroke="#74beff" stroke-width="5"/>
     <path d="M224 230 l29 22" stroke="#ffe2a5" stroke-width="9"/>
     <g fill="#cb93ff" stroke="#f0dcff" stroke-width="3"><path d="M344 261 l17 -78 25 63 -18 44z"/><path d="M400 260 l18 -101 31 75 -28 50z"/></g>
-   </svg><div class="cover-words"><span class="cover-tag">C++ • ROGUELITE</span><strong>CRYSTAL QUEST</strong><span>Combate, exploração e magia</span></div>
+   </svg><span class="cover-play">▶</span><div class="cover-words"><span class="cover-tag">C++ • ROGUELITE</span><strong>CRYSTAL QUEST</strong><span>Combate, exploração e magia</span></div>
  </button>
 </section>
+<div class="version-line"><span><span class="status-dot"></span>ARCADE V9 · SELECIONE E JOGUE</span><span>SEM DOWNLOAD</span></div>
 <nav class="tabs" aria-label="Escolher jogo">
 <button type="button" id="tab-snake" class="tab">🐍 Python · Snake</button>
 <button type="button" id="tab-jump" class="tab">⚡ Java · Neon Jump</button>
-<button type="button" id="tab-rpg" class="tab">⚔️ C++ · Mini RPG</button>
+<button type="button" id="tab-rpg" class="tab">⚔️ C++ · Crystal Quest</button>
 </nav>
 <section class="stage">
 <div class="meta"><div><span class="gameTitle" id="gameTitle">Snake</span><span class="tag" id="gameTag">PYTHON</span><div class="sub" id="gameSub"></div></div><div class="stats" id="stats">Pontos: 0</div></div>
@@ -125,9 +179,9 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 </section>
 <div class="controls">
 <div class="pad"><span></span><button class="touch" data-key="ArrowUp">▲</button><span></span><button class="touch" data-key="ArrowLeft">◀</button><button class="touch" data-key="ArrowDown">▼</button><button class="touch" data-key="ArrowRight">▶</button></div>
-<div class="controlR"><button class="touch action" data-key="Space">PULAR / ATACAR</button><button class="touch action" data-key="KeyH">CURA</button><button class="touch action" data-key="KeyE">PORTAL</button><button class="touch action" data-key="ShiftLeft">ESQUIVA</button><button class="touch action" data-key="KeyF">MAGIA</button><button class="touch action" data-key="KeyQ">GIRO</button><button class="touch action" data-key="KeyC">ONDA</button></div>
+<div class="controlR"><button class="touch action" data-key="Space">PULAR / ATACAR</button><button class="touch action" data-key="KeyH">CURA</button><button class="touch action" data-key="KeyE">INTERAGIR</button><button class="touch action" data-key="ShiftLeft">ESQUIVA</button><button class="touch action" data-key="KeyF">MAGIA</button><button class="touch action" data-key="KeyQ">GIRO</button><button class="touch action" data-key="KeyC">ONDA</button></div>
 </div>
-<div class="info" id="info"></div>
+<div class="info"><div class="mini" style="margin-bottom:6px">GUIA DO JOGO</div><div class="game-description" id="info"></div></div>
 <footer>Versões para navegador inspiradas nos projetos originais em Python, Java e C++. A execução aqui usa JavaScript e HTML Canvas.</footer>
 </main>
 <script>
@@ -137,12 +191,12 @@ const G={game:"snake",running:false,paused:false,dead:false,last:0,clock:0,score
 const configs={
 snake:{title:"Snake",tag:"PYTHON",sub:"Coma frutas e não bata no próprio corpo",hints:"Setas/WASD: mover a cobrinha",info:"<b>Python · Snake:</b> demonstra listas, variáveis, condições e repetição. Coma os pontos amarelos para crescer. Encostar no corpo ou nas paredes encerra a partida."},
 jump:{title:"Neon Jump ∞ · Vida única",tag:"JAVA",sub:"Plataformas, buracos, anéis, trampolins e obstáculos",hints:"Espaço / toque: pular · toque no ar perto de anéis para impulsionar",info:"<b>Neon Jump:</b> corrida infinita com apenas uma vida. Pule espinhos, caixas e serras; suba em plataformas, evite abismos e use trampolins automáticos. Anéis amarelos podem dar um salto no ar quando você toca neles. Novos obstáculos aparecem sem parar, e a velocidade aumenta a cada 17 segundos."},
-rpg:{title:"Crystal Quest: Roguelite",tag:"C++",sub:"Espadas, escudos, botas e magia · combates com esquiva",hints:"WASD: andar · Espaço: atacar · Shift/K: esquiva · F: magia · H: cura · E: portal",info:"<b>Crystal Quest:</b> agora os itens mudam sua jogabilidade: espada (+dano), escudo (redução do dano), botas (esquiva mais rápida), orbes (+magia), poções (cura) e cristais (recarregam magia). Ataque apenas na direção que estiver olhando. A energia de ataque se recupera ao andar. Fuja das áreas vermelhas de ataque e desvie dos projéteis inimigos. Shift = esquiva e F = raio mágico."}};
-function select(which){G.game=which;document.querySelectorAll(".cover-card").forEach(x=>x.classList.toggle("selected",x.id==="cover-"+which));document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset()}
+rpg:{title:"Crystal Quest: Roguelite",tag:"C++",sub:"Espadas, escudos, botas e magia · combates com esquiva",hints:"WASD: mover · Espaço: ataque · Shift: esquiva · F: magia · Q: giro · C: onda · E: interagir",info:"<b>Crystal Quest:</b> agora os itens mudam sua jogabilidade: espada (+dano), escudo (redução do dano), botas (esquiva mais rápida), orbes (+magia), poções (cura) e cristais (recarregam magia). Ataque apenas na direção que estiver olhando. A energia de ataque se recupera ao andar. Fuja das áreas vermelhas de ataque e desvie dos projéteis inimigos. Shift = esquiva e F = raio mágico."}};
+function select(which){G.game=which;document.body.dataset.game=which;document.querySelectorAll(".cover-card").forEach(x=>x.classList.toggle("selected",x.id==="cover-"+which));document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset()}
 function pop(title,msg,btn="JOGAR"){document.getElementById("overlayTitle").textContent=title;document.getElementById("overlayText").textContent=msg;document.getElementById("startBtn").textContent=btn;over.style.display="flex"}
 function hide(){over.style.display="none"}
 function rand(n){return Math.floor(Math.random()*n)}
-function reset(){document.getElementById("upgradeChoices").style.display="none";document.getElementById("startBtn").style.display="";G.running=false;G.paused=false;G.dead=false;G.score=0;G.clock=0;G.last=0;keys.clear();document.getElementById("pauseBtn").textContent="Ⅱ Pausar";if(G.game==="snake")newSnake();else if(G.game==="jump")newJump();else newRpg();pop(configs[G.game].title,G.game==="snake"?"Coma as frutas amarelas.\nEvite paredes e o próprio corpo!":G.game==="jump"?"UMA VIDA: encostou em perigo ou caiu, recomeça!\nPlataformas, anéis, trampolins e corrida infinita.":"Supere 4 andares, encontre cristais e derrote o guardião final.","INICIAR JOGO");draw()}
+function reset(){document.getElementById("upgradeChoices").style.display="none";document.getElementById("startBtn").style.display="";G.running=false;G.paused=false;G.dead=false;G.score=0;G.clock=0;G.last=0;keys.clear();document.getElementById("pauseBtn").textContent="Ⅱ Pausar";if(G.game==="snake")newSnake();else if(G.game==="jump")newJump();else newRpg();pop(configs[G.game].title,G.game==="snake"?"Coma as frutas amarelas.\nEvite paredes e o próprio corpo!":G.game==="jump"?"UMA VIDA: encostou em perigo ou caiu, recomeça!\nPlataformas, anéis, trampolins e corrida infinita.":"Explore 6 andares com baús, relíquias, chefões e habilidades.\nInteraja com E, ataque com Espaço e use Q e C para poderes especiais.","INICIAR JOGO");draw()}
 function start(){if(G.dead){reset()}G.running=true;G.paused=false;hide();G.last=performance.now();requestAnimationFrame(frame)}
 function finish(title,msg){G.running=false;G.dead=true;pop(title,msg,"JOGAR NOVAMENTE")}
 function pause(){if(!G.running){if(G.paused){G.paused=false;G.running=true;hide();G.last=performance.now();requestAnimationFrame(frame)}return}G.running=false;G.paused=true;pop("PAUSADO","Seu progresso está preservado.","CONTINUAR")}
