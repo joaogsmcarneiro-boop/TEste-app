@@ -65,13 +65,13 @@ const c=document.getElementById("game"),g=c.getContext("2d"),over=document.getEl
 const G={game:"snake",running:false,paused:false,dead:false,last:0,clock:0,score:0}, keys=new Set();
 const configs={
 snake:{title:"Snake",tag:"PYTHON",sub:"Coma frutas e não bata no próprio corpo",hints:"Setas/WASD: mover a cobrinha",info:"<b>Python · Snake:</b> demonstra listas, variáveis, condições e repetição. Coma os pontos amarelos para crescer. Encostar no corpo ou nas paredes encerra a partida."},
-jump:{title:"Neon Jump ∞",tag:"JAVA",sub:"Corrida infinita · obstáculos aleatórios · velocidade crescente",hints:"Espaço / toque: pular (duas vezes = salto duplo) · R: reiniciar",info:"<b>Java · Neon Jump infinito:</b> corrida sem linha de chegada. Seis tipos de obstáculos gerados continuamente (espinhos, duplos, caixas, serras, faixas de energia e totens). Velocidade aumenta a cada 14 segundos; trechos de descanso e distância adaptada à velocidade tornam o desafio justo. Fases visuais, estrelas e recorde local."},
+jump:{title:"Neon Jump ∞ · Vida única",tag:"JAVA",sub:"Plataformas, buracos, anéis, trampolins e obstáculos",hints:"Espaço / toque: pular · toque no ar perto de anéis para impulsionar",info:"<b>Neon Jump:</b> corrida infinita com apenas uma vida. Pule espinhos, caixas e serras; suba em plataformas, evite abismos e use trampolins automáticos. Anéis amarelos podem dar um salto no ar quando você toca neles. Novos obstáculos aparecem sem parar, e a velocidade aumenta a cada 17 segundos."},
 rpg:{title:"Crystal Quest: Roguelite",tag:"C++",sub:"Espadas, escudos, botas e magia · combates com esquiva",hints:"WASD: andar · Espaço: atacar · Shift/K: esquiva · F: magia · H: cura · E: portal",info:"<b>Crystal Quest:</b> agora os itens mudam sua jogabilidade: espada (+dano), escudo (redução do dano), botas (esquiva mais rápida), orbes (+magia), poções (cura) e cristais (recarregam magia). Ataque apenas na direção que estiver olhando. A energia de ataque se recupera ao andar. Fuja das áreas vermelhas de ataque e desvie dos projéteis inimigos. Shift = esquiva e F = raio mágico."}};
 function select(which){G.game=which;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset()}
 function pop(title,msg,btn="JOGAR"){document.getElementById("overlayTitle").textContent=title;document.getElementById("overlayText").textContent=msg;document.getElementById("startBtn").textContent=btn;over.style.display="flex"}
 function hide(){over.style.display="none"}
 function rand(n){return Math.floor(Math.random()*n)}
-function reset(){document.getElementById("upgradeChoices").style.display="none";document.getElementById("startBtn").style.display="";G.running=false;G.paused=false;G.dead=false;G.score=0;G.clock=0;G.last=0;keys.clear();document.getElementById("pauseBtn").textContent="Ⅱ Pausar";if(G.game==="snake")newSnake();else if(G.game==="jump")newJump();else newRpg();pop(configs[G.game].title,G.game==="snake"?"Coma as frutas amarelas.\nEvite paredes e o próprio corpo!":G.game==="jump"?"Corrida infinita! Obstáculos aleatórios e 5 vidas.\nGanhe velocidade a cada 14 segundos e bata seu recorde.":"Supere 4 andares, encontre cristais e derrote o guardião final.","INICIAR JOGO");draw()}
+function reset(){document.getElementById("upgradeChoices").style.display="none";document.getElementById("startBtn").style.display="";G.running=false;G.paused=false;G.dead=false;G.score=0;G.clock=0;G.last=0;keys.clear();document.getElementById("pauseBtn").textContent="Ⅱ Pausar";if(G.game==="snake")newSnake();else if(G.game==="jump")newJump();else newRpg();pop(configs[G.game].title,G.game==="snake"?"Coma as frutas amarelas.\nEvite paredes e o próprio corpo!":G.game==="jump"?"UMA VIDA: encostou em perigo ou caiu, recomeça!\nPlataformas, anéis, trampolins e corrida infinita.":"Supere 4 andares, encontre cristais e derrote o guardião final.","INICIAR JOGO");draw()}
 function start(){if(G.dead){reset()}G.running=true;G.paused=false;hide();G.last=performance.now();requestAnimationFrame(frame)}
 function finish(title,msg){G.running=false;G.dead=true;pop(title,msg,"JOGAR NOVAMENTE")}
 function pause(){if(!G.running){if(G.paused){G.paused=false;G.running=true;hide();G.last=performance.now();requestAnimationFrame(frame)}return}G.running=false;G.paused=true;pop("PAUSADO","Seu progresso está preservado.","CONTINUAR")}
@@ -142,238 +142,208 @@ function drawSnake(){
  txt("PONTOS  "+G.score,703,28,"#d5fff3",16);
  st.textContent="Pontos: "+G.score;
 }
-// NEON JUMP - ENDLESS ARCADE 3.0 (progressive, procedurally generated)
+// NEON JUMP 4: infinite platforming, one-hit death, animated mechanics
 let jp={};
-const HAZARDS=["spike","double","crate","saw","pulse","totem"];
-const HAZARD_WIDTH={spike:46,double:78,crate:52,saw:52,pulse:90,totem:43};
+const JGROUND=427,JSIZE=38;
 const J_SCENES=[
- {sky:["#0a1532","#35295c","#0a4760"],moon:"#dcd4ff",back:"#25385d",front:"#132a4d",accent:"#53e9f6",ground:"#10283e"},
- {sky:["#29112b","#6c2d57","#aa5b64"],moon:"#ffdcba",back:"#60345f",front:"#452c54",accent:"#ffbd84",ground:"#39263c"},
- {sky:["#071d2a","#14556b","#157e88"],moon:"#bdfbed",back:"#255a70",front:"#13495e",accent:"#8fffd2",ground:"#113f4d"},
- {sky:["#110f31","#35296c","#5c3990"],moon:"#d9c7ff",back:"#363464",front:"#292653",accent:"#d5a3ff",ground:"#232448"}
-];
-function jumpBest(){try{return Math.max(0,Number(localStorage.getItem("neon_jump_best_v3"))||0)}catch(e){return 0}}
-function saveJumpBest(){if(G.score>jp.best){jp.best=G.score;try{localStorage.setItem("neon_jump_best_v3",String(jp.best))}catch(e){}}}
+{sky:["#091733","#243967","#14506a"],moon:"#dfd6ff",back:"#304c6e",front:"#122e4c",accent:"#70edfe",ground:"#10273e"},
+{sky:["#301531","#652958","#af5b76"],moon:"#fff0ce",back:"#773c67",front:"#462649",accent:"#ffc28b",ground:"#38263f"},
+{sky:["#062e39","#12667b","#157e83"],moon:"#b6ffda",back:"#376b78",front:"#125567",accent:"#9bffcb",ground:"#11424d"},
+{sky:["#170d35","#373076","#693891"],moon:"#e0caff",back:"#433666",front:"#262957",accent:"#d5a5ff",ground:"#242241"}];
+function jumpBest(){try{return +localStorage.getItem("neon_jump_best_v3")||0}catch(e){return 0}}
+function saveJumpBest(){if(G.score>jp.best){jp.best=G.score;try{localStorage.setItem("neon_jump_best_v3",G.score)}catch(e){}}}
+function spark(x,y,color,n=8){for(let i=0;i<n;i++){let a=Math.random()*Math.PI*2,r=40+Math.random()*110;jp.sparks.push({x,y,vx:Math.cos(a)*r,vy:Math.sin(a)*r,life:.3+Math.random()*.35,color})}}
 function newJump(){
- jp={y:0,vy:0,jumps:0,progress:0,elapsed:0,tier:0,speed:225,
-      obstacles:[],coins:[],lastSpawn:0,spawned:0,passed:0,
-      lives:5,inv:0,bonus:0,trail:[],best:jumpBest(),shake:0,notice:2.2,noticeText:"CORRIDA INFINITA",scenes:0};
- for(let i=0;i<4;i++)spawnJump();
+ jp={y:JGROUND-JSIZE,vy:0,grounded:true,angle:0,progress:0,speed:224,time:0,tier:0,theme:0,
+ obstacles:[],platforms:[],gaps:[],pads:[],orbs:[],coins:[],sparks:[],last:300,count:0,
+ best:jumpBest(),message:"VIDA ÚNICA · CORRIDA INFINITA",messageTime:3};
+ for(let i=0;i<5;i++)spawnJump();
 }
 function spawnJump(){
- const i=jp.spawned++,tier=jp.tier;
- let type;
- if(i<2)type="spike";
- else if(i===2)type="crate";
- else{
-   const available=tier===0?HAZARDS.slice(0,4):HAZARDS;
-   type=available[rand(available.length)];
-   if(i>0&&type===jp.obstacles[jp.obstacles.length-1]?.type){
-     type=available[(available.indexOf(type)+1+rand(available.length-1))%available.length];
-   }
- }
- // World-space spacing: at least 1.8 seconds between hazards.
- // Every few hazards, grant an especially long recovery section.
- const longBreak=i>0&&i%6===0;
- const gap=Math.max(450,jp.speed*(1.85+Math.random()*.65+(longBreak?.6:0)));
- const x=i===0?650:jp.lastSpawn+gap;
- const obstacle={x,type,width:HAZARD_WIDTH[type],phase:rand(40)/10,passed:false};
- jp.obstacles.push(obstacle);
- if(i>1&&Math.random()<.72){
-   const cx=x-gap*.47;
-   jp.coins.push({x:cx,y:332-(i%3)*30,taken:false});
- }
- jp.lastSpawn=x;
+ const n=jp.count++,lev=jp.tier;
+ const kinds=lev===0?["spike","platform","gap","crate","saw","pad","orb"]:
+   lev<3?["spike","platform","gap","crate","saw","pad","orb","stairs","double","bridge"]:
+         ["spike","platform","gap","crate","saw","pad","orb","stairs","double","bridge","totem"];
+ let type=n===0?"spike":n===1?"platform":n===2?"gap":n===3?"pad":kinds[rand(kinds.length)];
+ if(type===jp.lastType&&kinds.length>1)type=kinds[(kinds.indexOf(type)+1+rand(kinds.length-1))%kinds.length];
+ const spacing=Math.max(505,jp.speed*(2.15+Math.random()*.45))+(n%7===6?180:0);
+ const x=n===0?650:jp.last+spacing;
+ jp.last=x;jp.lastType=type;
+ const hazard=(kind,xx,yy,w,hh)=>jp.obstacles.push({type:kind,x:xx,y:yy,w,h:hh,done:false});
+ const platform=(xx,yy,w)=>jp.platforms.push({x:xx,y:yy,w,h:16});
+ if(type==="spike")hazard("spike",x,JGROUND-43,46,43);
+ if(type==="double")hazard("double",x,JGROUND-41,80,41);
+ if(type==="crate")hazard("crate",x,JGROUND-58,52,58);
+ if(type==="saw")hazard("saw",x,JGROUND-58,54,58);
+ if(type==="totem")hazard("totem",x,JGROUND-78,45,78);
+ if(type==="gap"){jp.gaps.push({x,w:89+Math.min(25,lev*3)});jp.coins.push({x:x+44,y:325,used:false})}
+ if(type==="platform"){platform(x,JGROUND-81,205);hazard("spike",x+112,JGROUND-42,46,42);jp.coins.push({x:x+141,y:294,used:false})}
+ if(type==="stairs"){platform(x,JGROUND-65,130);platform(x+165,JGROUND-98,135);hazard("spike",x+210,JGROUND-40,45,40)}
+ if(type==="pad"){jp.pads.push({x,w:48,used:false});platform(x+150,JGROUND-117,175);jp.coins.push({x:x+230,y:273,used:false})}
+ if(type==="orb"){jp.orbs.push({x:x+120,y:300,used:false,phase:Math.random()*6});hazard("spike",x+246,JGROUND-41,45,41)}
+ if(type==="bridge"){jp.gaps.push({x:x+65,w:114});platform(x+118,JGROUND-82,172);jp.coins.push({x:x+168,y:297,used:false})}
 }
 function jump(){
  if(G.game!=="jump")return;
- if(!G.running){if(!G.paused)start();return}
- if(jp.jumps<2){
-   jp.vy=jp.jumps===0?-790:-680;
-   jp.y=Math.min(-1,jp.y);
-   jp.jumps++;
-   for(let i=0;i<9;i++)jp.trail.push({x:190+rand(30)-15,y:402+jp.y+rand(18),life:.44});
+ if(!G.running){if(!G.dead&&!G.paused)start();return}
+ const wx=jp.progress+185;
+ for(const orb of jp.orbs)if(!orb.used&&Math.hypot(wx-orb.x,jp.y+19-orb.y)<54){
+   orb.used=true;jp.grounded=false;jp.vy=-800;spark(185,jp.y+19,"#ffe28a",17);
+   jp.message="ORB! IMPULSO AÉREO";jp.messageTime=1.4;return;
  }
+ if(jp.grounded){jp.grounded=false;jp.vy=-755;spark(185,jp.y+36,"#a4efff",9)}
 }
-function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
-function jumpHitBox(o,x){
- const base=427,bob=Math.sin(G.clock*3.8+o.phase)*5;
- if(o.type==="spike")return{x:x+11,y:base-31,w:25,h:29};
- if(o.type==="double")return{x:x+9,y:base-30,w:60,h:28};
- if(o.type==="crate")return{x:x+8,y:base-50,w:36,h:46};
- if(o.type==="saw")return{x:x+13,y:base-55+bob,w:28,h:33};
- if(o.type==="pulse")return{x:x+8,y:base-21,w:74,h:19};
- return{x:x+8,y:base-69,w:28,h:65};
+function jumpDeath(reason){
+ if(!G.running)return;
+ saveJumpBest();spark(185,jp.y+18,"#ff799e",22);
+ finish("FIM DE JOGO · VIDA ÚNICA",reason+"\nDistância: "+Math.floor(jp.progress/10)+" m"+
+ "\nPontos: "+G.score+"\nRecorde: "+jp.best);
+}
+function jOverlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function hitJump(o){
+ if(o.type==="spike")return{x:o.x+11,y:o.y+10,w:24,h:o.h-13};
+ if(o.type==="double")return{x:o.x+9,y:o.y+8,w:62,h:o.h-11};
+ if(o.type==="saw")return{x:o.x+11,y:o.y+10,w:32,h:36};
+ return{x:o.x+6,y:o.y+4,w:o.w-12,h:o.h-7};
 }
 function updateJump(dt){
- jp.elapsed+=dt;
- const nextTier=Math.floor(jp.elapsed/14);
- if(nextTier>jp.tier){
-   jp.tier=nextTier;jp.scenes=Math.floor(jp.tier/2)%J_SCENES.length;
-   jp.noticeText="NÍVEL "+(jp.tier+1)+" · ACELERANDO!";
-   jp.notice=2.5;
- }
- jp.speed=225+Math.min(240,jp.tier*25);
+ const oldBottom=jp.y+JSIZE;
+ jp.time+=dt;
+ const next=Math.floor(jp.time/17);
+ if(next>jp.tier){jp.tier=next;jp.theme=Math.floor(next/2)%4;
+   jp.message="NÍVEL "+(next+1)+" · ACELERANDO!";jp.messageTime=2.4}
+ jp.speed=224+Math.min(190,jp.tier*19);
  jp.progress+=jp.speed*dt;
- jp.vy+=1750*dt;jp.y+=jp.vy*dt;
- if(jp.y>=0){jp.y=0;jp.vy=0;jp.jumps=0}
- jp.notice=Math.max(0,jp.notice-dt);jp.shake=Math.max(0,jp.shake-dt);
- jp.inv=Math.max(0,jp.inv-dt);
- while(jp.lastSpawn<jp.progress+1650)spawnJump();
- jp.obstacles=jp.obstacles.filter(o=>o.x+jp.progress*0>=jp.progress-180);
- jp.coins=jp.coins.filter(c=>!c.taken&&c.x>=jp.progress-180);
- for(const p of jp.trail){p.x-=jp.speed*dt;p.y+=32*dt;p.life-=dt}
- jp.trail=jp.trail.filter(p=>p.life>0);
- const box={x:175,y:427-39+jp.y,w:28,h:34};
+ const wx=jp.progress+185;
+ while(jp.last<jp.progress+1550)spawnJump();
+ for(const key of ["obstacles","platforms","gaps","pads"])jp[key]=jp[key].filter(x=>x.x+(x.w||0)>jp.progress-210);
+ for(const key of ["coins","orbs"])jp[key]=jp[key].filter(x=>x.x>jp.progress-210&&!x.used);
+ jp.messageTime=Math.max(0,jp.messageTime-dt);
+ jp.sparks.forEach(p=>{p.x+=(p.vx-jp.speed)*dt;p.y+=p.vy*dt;p.vy+=dt*100;p.life-=dt});
+ jp.sparks=jp.sparks.filter(x=>x.life>0).slice(-80);
+ jp.vy+=1800*dt;jp.y+=jp.vy*dt;
+ let surface=Infinity;
+ if(jp.vy>=0){
+   if(!jp.gaps.some(g=>wx>=g.x&&wx<=g.x+g.w)&&oldBottom<=JGROUND+7&&jp.y+JSIZE>=JGROUND)surface=JGROUND;
+   for(const p of jp.platforms)if(wx+14>p.x&&wx-14<p.x+p.w&&oldBottom<=p.y+7&&jp.y+JSIZE>=p.y)surface=Math.min(surface,p.y);
+ }
+ if(Number.isFinite(surface)){
+   if(!jp.grounded)spark(185,surface-2,"#86f9df",5);
+   jp.y=surface-JSIZE;jp.vy=0;jp.grounded=true;
+ }else jp.grounded=false;
+ for(const p of jp.pads){
+   if(!p.used&&wx>=p.x-6&&wx<p.x+p.w+6&&Math.abs(jp.y+JSIZE-JGROUND)<15){
+     p.used=true;jp.vy=-905;jp.grounded=false;
+     jp.message="TRAMPOLIM!";jp.messageTime=1.3;spark(185,JGROUND-10,"#ffe68d",20);
+   }
+ }
+ const box={x:wx-14,y:jp.y+4,w:28,h:JSIZE-7};
+ for(const p of jp.platforms){
+   const rect={x:p.x,y:p.y,w:p.w,h:16};
+   if(jOverlap(box,rect)&&!(jp.grounded&&jp.y+JSIZE===p.y)){jumpDeath("Colisão com uma plataforma.");return}
+ }
  for(const o of jp.obstacles){
-   const sx=o.x-jp.progress+185;
-   if(sx>1050||sx<-100)continue;
-   if(!o.passed&&sx+o.width<166){o.passed=true;jp.passed++;G.score+=10}
-   if(jp.inv<=0&&overlap(box,jumpHitBox(o,sx))){
-      jp.lives--;jp.inv=1.6;jp.shake=.3;
-      jp.vy=-420;jp.y=Math.min(jp.y,-20);jp.jumps=1;
-      if(jp.lives<=0){saveJumpBest();finish("FIM DE CORRIDA",
-        "Distância: "+Math.floor(jp.progress/10)+" m\nPontos: "+G.score+
-        "\nRecorde: "+jp.best+"\nTente superar sua marca!");return}
-   }
+   if(!o.done&&o.x+o.w<wx-15){o.done=true;G.score+=12}
+   if(jOverlap(box,hitJump(o))){jumpDeath("Você atingiu um obstáculo.");return}
  }
- for(const coin of jp.coins){
-   const sx=coin.x-jp.progress+185;
-   if(Math.abs(sx-188)<25&&Math.abs(coin.y-(405+jp.y))<37){
-     coin.taken=true;jp.bonus++;G.score+=25;
-   }
+ for(const coin of jp.coins)if(!coin.used&&Math.hypot(wx-coin.x,jp.y+19-coin.y)<27){
+   coin.used=true;G.score+=25;spark(185,jp.y+19,"#ffe5a0",12);
  }
+ if(jp.y>545){jumpDeath("Você caiu no abismo.");return}
+ if(!jp.grounded)jp.angle+=dt*jp.speed/55;
+ else jp.angle+=(0-jp.angle)*Math.min(1,dt*11);
  if(G.score>jp.best)saveJumpBest();
 }
 function drawJump(){
- const base=427,scene=J_SCENES[jp.scenes];
- g.save();
- if(jp.shake>0)g.translate(Math.sin(G.clock*71)*jp.shake*10,Math.cos(G.clock*67)*jp.shake*7);
- let sky=g.createLinearGradient(0,0,0,540);
- sky.addColorStop(0,scene.sky[0]);sky.addColorStop(.62,scene.sky[1]);sky.addColorStop(1,scene.sky[2]);
- rect(0,0,960,540,sky);
- // Animated sky: shooting stars, drifting dust and layered lighting
- for(let i=0;i<5;i++){
-  const x=(i*257-G.clock*(24+i*9))%1250+80,y=30+i*56+Math.sin(G.clock*.5+i)*12;
-  g.save();g.globalAlpha=.12+i*.028;g.strokeStyle="#e5f7ff";g.lineWidth=2;
-  g.beginPath();g.moveTo(x,y);g.lineTo(x-35,y+11);g.stroke();g.restore();
- }
- // Twinkling sky and floating atmospheric particles.
- for(let i=0;i<58;i++){
-   const x=(i*157+61)%960,y=(i*79+13)%310;
-   g.globalAlpha=.23+Math.abs(Math.sin(G.clock*.7+i))*.56;
-   rect(x,y,2+(i%4===0?2:0),2+(i%4===0?2:0),i%6===0?"#fff2ab":"#e2f8ff");
- }
- g.globalAlpha=1;
- const glow=g.createRadialGradient(780,104,2,780,104,95);
- glow.addColorStop(0,scene.moon+"aa");glow.addColorStop(1,scene.moon+"00");
- rect(680,15,200,180,glow);g.fillStyle=scene.moon;
- g.beginPath();g.arc(780,104,29,0,Math.PI*2);g.fill();
+ const scene=J_SCENES[jp.theme],bg=g.createLinearGradient(0,0,0,540);
+ bg.addColorStop(0,scene.sky[0]);bg.addColorStop(.62,scene.sky[1]);bg.addColorStop(1,scene.sky[2]);
+ rect(0,0,960,540,bg);
+ for(let i=0;i<70;i++){
+   g.globalAlpha=.22+Math.abs(Math.sin(G.clock*.8+i))*.5;
+   rect((i*149+27)%960,(i*79+11)%309,i%3===0?3:2,i%3===0?3:2,"#dcf2ff");
+ }g.globalAlpha=1;
+ const glow=g.createRadialGradient(777,99,4,777,99,95);
+ glow.addColorStop(0,scene.moon+"99");glow.addColorStop(1,scene.moon+"00");
+ rect(676,0,200,190,glow);
+ g.fillStyle=scene.moon;g.beginPath();g.arc(777,99,30,0,7);g.fill();
  for(let layer=0;layer<3;layer++){
-   const speed=[.07,.16,.34][layer],offset=(jp.progress*speed)%140;
-   const color=[scene.back,scene.back,scene.front][layer];
+   const offset=jp.progress*[.12,.23,.38][layer]%141;
    for(let i=-2;i<11;i++){
-     const x=i*140-offset,h=80+((i*31+layer*91+10000)%118);
-     rect(x,base-h,108,h,color);
-     if(layer>0)for(let row=0;row<3;row++)for(let col=0;col<3;col++)
-       if((i+row+col)%3!==0)
-         rect(x+13+col*29,base-h+15+row*30,7,12,layer===1?"#ffe7ae35":"#96dfff35");
+     const x=i*141-offset,ht=88+(i*43+layer*83+900)%109;
+     rect(x,JGROUND-ht,109,ht,layer===0?scene.back:scene.front);
+     for(let j=0;j<4;j++)for(let k=0;k<2;k++)if((i+j+k)%3!==0)
+       rect(x+15+k*39,JGROUND-ht+15+j*29,9,13,"#fff5b527");
    }
  }
- // Foreground silhouettes and floor reflections give the endless scene more depth.
- for(let i=0;i<8;i++){
-  const x=((i*195-jp.progress*.23)%1300+1300)%1300;
-  rect(x,base-16,45,16,scene.front);
-  rect(x+7,base-24,10,8,scene.front);
+ rect(0,JGROUND,960,113,scene.ground);
+ g.save();g.shadowColor=scene.accent;g.shadowBlur=9;rect(0,JGROUND-4,960,5,scene.accent);g.restore();
+ for(let i=0;i<20;i++){const x=((i*65-jp.progress*.8)%1170+1170)%1170;rect(x,JGROUND+14,30,3,scene.accent+"66")}
+ for(const gap of jp.gaps){
+   const x=gap.x-jp.progress+185;if(x>1000||x+gap.w<-50)continue;
+   rect(x-1,JGROUND-5,gap.w+2,120,"#090f26");
+   rect(x,JGROUND-4,5,8,"#f47ca0");rect(x+gap.w-5,JGROUND-4,5,8,"#f47ca0");
  }
- rect(0,base,960,113,scene.ground);
- g.save();g.shadowColor=scene.accent;g.shadowBlur=9;rect(0,base-4,960,5,scene.accent);g.restore();
- for(let i=0;i<19;i++){
-   const x=((i*66-jp.progress*.84)%1150+1150)%1150;
-   rect(x,base+14,34,3,scene.accent+"55");
- }
- for(let i=0;i<8;i++){
-   g.strokeStyle=scene.accent+"2b";g.lineWidth=1;g.beginPath();
-   g.moveTo(0,base+24+i*13);g.lineTo(960,base+24+i*13);g.stroke();
- }
- for(const coin of jp.coins){
-   const x=coin.x-jp.progress+185;
-   if(x<-30||x>1000)continue;
-   const y=coin.y+Math.sin(G.clock*5+x*.01)*5;
-   g.save();g.shadowBlur=13;g.shadowColor="#ffdd86";
-   g.fillStyle="#ffd978";g.beginPath();g.arc(x,y,10,0,7);g.fill();
-   g.shadowBlur=0;g.strokeStyle="#fff8d1";g.lineWidth=2;g.stroke();
-   rect(x-2,y-5,4,10,"#ad7b36");g.restore();
- }
- for(const o of jp.obstacles){
-   const x=o.x-jp.progress+185;
-   if(x<-110||x>1060)continue;
-   g.save();
-   g.shadowBlur=13;g.shadowColor=o.type==="saw"?"#bd8fff":o.type==="crate"?"#ffbf81":"#ff789e";
-   if(o.type==="spike"||o.type==="double"){
-     const n=o.type==="double"?2:1,size=o.type==="double"?39:46;
-     for(let i=0;i<n;i++){
-       const sx=x+i*39;
-       g.fillStyle="#ff719a";g.strokeStyle="#ffe0e9";g.lineWidth=2;
-       g.beginPath();g.moveTo(sx,base);g.lineTo(sx+size/2,base-(o.type==="double"?40:46));
-       g.lineTo(sx+size,base);g.closePath();g.fill();g.stroke();
-       rect(sx+size/2-2,base-17,4,10,"#fff1fd");
-     }
-   }else if(o.type==="crate"){
-     rect(x,base-60,52,60,"#b46a5d");rect(x+5,base-55,42,51,"#f0a679");
-     rect(x+22,base-55,8,51,"#a2605a");rect(x+5,base-34,42,8,"#a2605a");
-     g.strokeStyle="#ffe6b7";g.strokeRect(x+2,base-58,48,55);
-   }else if(o.type==="saw"){
-     const cy=base-34+Math.sin(G.clock*3.8+o.phase)*5;
-     g.save();g.translate(x+25,cy);g.rotate(G.clock*4.2);
-     g.fillStyle="#d6aaff";g.beginPath();
-     for(let i=0;i<16;i++){const a=i*Math.PI/8,r=i%2?17:28;g.lineTo(Math.cos(a)*r,Math.sin(a)*r)}
-     g.closePath();g.fill();g.fillStyle="#544674";
-     g.beginPath();g.arc(0,0,12,0,7);g.fill();g.restore();
-   }else if(o.type==="pulse"){
-     g.shadowColor="#ff6fd5";g.shadowBlur=15;
-     rect(x,base-17,90,17,"#c558c9");rect(x+5,base-24,80,6,"#fff0fc");
-     for(let i=0;i<5;i++)rect(x+8+i*17,base-13,8,8,"#ffdeff");
-   }else{
-     rect(x+3,base-83,37,83,"#616292");
-     rect(x+8,base-77,27,67,"#c08bf5");
-     rect(x+15,base-62,13,12,"#fff1b8");
-     rect(x+8,base-25,27,6,"#694f96");
-   }
+ for(const p of jp.platforms){
+   const x=p.x-jp.progress+185;if(x>1010||x+p.w<-40)continue;
+   g.save();g.shadowColor=scene.accent;g.shadowBlur=11;
+   rect(x,p.y,p.w,15,scene.accent);g.shadowBlur=0;rect(x+4,p.y+5,p.w-8,12,"#293251");
+   rect(x+7,p.y+16,p.w-14,12,"#18223d");
+   for(let i=0;i<p.w/24;i++)rect(x+8+i*24,p.y+20,13,3,"#739bca");
    g.restore();
  }
- for(const p of jp.trail){g.globalAlpha=p.life/.44;rect(p.x,p.y,9,9,scene.accent);g.globalAlpha=1}
- g.save();
- if(jp.inv>0&&Math.floor(G.clock*12)%2===0)g.globalAlpha=.37;
- g.translate(185,base-21+jp.y);
- if(jp.y<0)g.rotate(jp.progress*.015);
- g.shadowBlur=19;g.shadowColor=scene.accent;
- rect(-21,-21,42,42,scene.accent);g.shadowBlur=0;
- rect(-15,-15,30,30,"#d5ffff");
- rect(-10,-8,7,9,"#222e56");rect(6,-8,7,9,"#222e56");
- rect(-4,7,10,3,"#2f597a");
- rect(-17,5,7,5,"#fb8dba");rect(10,5,7,5,"#fb8dba");
- rect(-15,-17,30,3,"#ffffff8a");g.restore();
- // Telegraph next jump; hazard type varied.
- const coming=jp.obstacles.find(o=>o.x-jp.progress>0);
- if(coming&&coming.x-jp.progress<330&&coming.x-jp.progress>78&&jp.y===0){
-   const distance=coming.x-jp.progress;
-   txt(distance<165?"P U L E !":"PREPARE-SE",415,340,"#fff3cb",20);
+ for(const p of jp.pads){
+   const x=p.x-jp.progress+185;if(x>1000||x<-70)continue;
+   g.save();g.shadowColor="#ffe180";g.shadowBlur=p.used?3:16;
+   rect(x,JGROUND-11,p.w,11,p.used?"#868377":"#ffd76a");
+   rect(x+5,JGROUND-17,p.w-10,6,p.used?"#88867d":"#fff0b1");
+   txt("↑",x+12,JGROUND-21,"#fff8d2",21);g.restore();
  }
- rect(24,20,912,8,"#273652");
- const levelFrac=(jp.elapsed%14)/14;
- rect(24,20,912*levelFrac,8,scene.accent);
- txt("∞ NEON RUN  •  NÍVEL "+(jp.tier+1),24,57,"#e2f8ff",18);
- txt("VIDAS "+"♥".repeat(jp.lives)+"♡".repeat(5-jp.lives),24,86,"#ffadd0",18);
- txt("★ "+G.score+"   RECORDE "+jp.best,670,58,"#ffe7b0",15);
- txt("DIST. "+Math.floor(jp.progress/10)+"m  ·  "+Math.round(jp.speed)+" px/s",665,85,"#d9f7ff",14);
- if(jp.notice>0){
-   g.globalAlpha=Math.min(1,jp.notice,1.2);
-   rect(318,112,324,48,"#101c36c9");txt(jp.noticeText,332,143,"#ffedbf",19);
-   g.globalAlpha=1;
+ for(const orb of jp.orbs){
+   const x=orb.x-jp.progress+185,y=orb.y+Math.sin(G.clock*5+orb.phase)*4;
+   if(x>1000||x<-40)continue;
+   g.save();g.shadowColor="#ffdb81";g.shadowBlur=20;g.strokeStyle="#ffe99d";g.lineWidth=5;
+   g.beginPath();g.arc(x,y,18+Math.sin(G.clock*6)*2,0,7);g.stroke();
+   g.fillStyle="#ffeab0";g.beginPath();g.arc(x,y,7,0,7);g.fill();g.restore();
  }
- st.textContent="∞ "+Math.floor(jp.progress/10)+" m | Velocidade "+Math.round(jp.speed)+" | ♥ "+jp.lives;
- g.restore();
+ for(const o of jp.obstacles){
+   const x=o.x-jp.progress+185;if(x>1020||x+o.w<-60)continue;
+   g.save();g.shadowColor=o.type==="saw"?"#c99fff":"#ff759a";g.shadowBlur=12;
+   if(o.type==="spike"||o.type==="double"){
+     const n=o.type==="double"?2:1,w=n===2?40:46;
+     for(let i=0;i<n;i++){
+       const xx=x+i*40;g.fillStyle="#ff7198";g.strokeStyle="#ffe6ef";g.lineWidth=2;
+       g.beginPath();g.moveTo(xx,JGROUND);g.lineTo(xx+w/2,o.y);g.lineTo(xx+w,JGROUND);
+       g.closePath();g.fill();g.stroke();
+     }
+   }else if(o.type==="saw"){
+     g.save();g.translate(x+o.w/2,JGROUND-31);g.rotate(G.clock*4.8);
+     g.fillStyle="#cea8fe";g.beginPath();
+     for(let i=0;i<16;i++){let a=i*Math.PI/8,r=i%2?17:28;g.lineTo(Math.cos(a)*r,Math.sin(a)*r)}
+     g.closePath();g.fill();g.fillStyle="#64567c";g.beginPath();g.arc(0,0,13,0,7);g.fill();g.restore();
+   }else if(o.type==="crate"){
+     rect(x,o.y,o.w,o.h,"#bc7674");rect(x+5,o.y+5,o.w-10,o.h-10,"#e4ab7d");
+     rect(x+20,o.y+5,10,o.h-10,"#9f6871");rect(x+5,o.y+28,o.w-10,9,"#9f6871");
+   }else{
+     rect(x,o.y,o.w,o.h,"#9776c0");rect(x+5,o.y+5,o.w-10,o.h-10,"#d0a7f5");
+     rect(x+13,o.y+18,8,11,"#fff0bf");rect(x+26,o.y+18,8,11,"#fff0bf");
+   }g.restore();
+ }
+ for(const coin of jp.coins){
+   const x=coin.x-jp.progress+185;if(x>1000||x<-40)continue;
+   g.save();g.shadowColor="#ffdb7a";g.shadowBlur=14;g.fillStyle="#ffda88";
+   g.beginPath();g.arc(x,coin.y+Math.sin(G.clock*5)*4,10,0,7);g.fill();g.restore();
+ }
+ for(const p of jp.sparks){g.globalAlpha=Math.min(1,p.life*2.3);rect(p.x,p.y,5,5,p.color)}g.globalAlpha=1;
+ g.save();g.translate(185,jp.y+19);g.rotate(jp.angle);
+ g.shadowColor=scene.accent;g.shadowBlur=16;rect(-19,-19,38,38,scene.accent);g.shadowBlur=0;
+ rect(-13,-13,26,26,"#d1faff");rect(-10,-8,7,8,"#22395c");rect(5,-8,7,8,"#22395c");
+ rect(-3,6,9,3,"#2b657b");g.restore();
+ txt("∞ NEON JUMP  ·  VIDA ÚNICA",25,51,"#ecfaff",18);
+ txt("DISTÂNCIA "+Math.floor(jp.progress/10)+" m",25,81,"#ecfaff",16);
+ txt("VELOCIDADE "+Math.round(jp.speed),744,52,"#eefaff",16);
+ txt("RECORDE "+jp.best,783,81,"#ffe5ab",15);
+ if(jp.messageTime>0){rect(236,107,493,43,"#132041dd");txt(jp.message,252,135,"#fff1c5",20)}
+ st.textContent=Math.floor(jp.progress/10)+" m · "+Math.round(jp.speed)+" px/s · 1 vida";
 }
 // CRYSTAL QUEST: ROGUELITE EDITION
 let rp={};const T=40,ox=80,oy=30,tilesX=20,tilesY=12;
