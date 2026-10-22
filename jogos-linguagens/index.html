@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arcade das Linguagens | Python, Java e C++</title>
+<title>Arcade v5.0 | Snake · Neon Jump · Crystal Quest</title>
 <style>
 :root{--bg:#0a1020;--panel:#141e32;--line:#33445c;--ink:#ecf6ff;--muted:#a6b8d0;--cyan:#4ddbf1;--yellow:#ffdd69;--pink:#fd7597;--green:#84eba1}
 *{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 25% 0%,#1b3456,transparent 42%),#090f1f;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -15,7 +15,7 @@ mark{background:transparent;color:var(--cyan)}.mini{font-size:12px;letter-spacin
 button{font:inherit;cursor:pointer}
 .tab{border:1px solid #344962;background:#182640;color:#d3e4f6;padding:13px 7px;border-radius:12px;transition:.2s;font-size:clamp(12px,2.2vw,16px);font-weight:750}
 .tab.active{border-color:#5de9f6;background:#12374a;box-shadow:0 0 25px #10d2ec22;color:white}
-.stage{border-radius:18px;overflow:hidden;border:1px solid #344963;background:#0b1224;box-shadow:0 22px 55px #0005}
+ .stage{border-radius:18px;overflow:hidden;border:1px solid #344963;background:#0b1224;box-shadow:0 22px 55px #0005}
 .meta{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px;background:#17243a;border-bottom:1px solid #2c405c}
 .gameTitle{font-size:19px;font-weight:800}.tag{font-size:12px;color:#f9d773;margin-left:8px}
 .sub{font-size:13px;color:#b3c6dc}.stats{font-size:15px;color:#fce19b;font-weight:bold}
@@ -41,7 +41,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 </head>
 <body>
 <main>
-<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill">PYTHON · JAVA · C++</div></header>
+<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><small>Exemplos jogáveis no navegador, sem instalar nada.</small></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 5.0</b> · PYTHON · JAVA · C++</div></header>
 <nav class="tabs" aria-label="Escolher jogo">
 <button type="button" id="tab-snake" class="tab">🐍 Python · Snake</button>
 <button type="button" id="tab-jump" class="tab">⚡ Java · Neon Jump</button>
@@ -112,8 +112,10 @@ function drawSnake(){
   g.save();g.lineCap="round";g.lineJoin="round";
   g.beginPath();g.moveTo(...pts[0]);for(let i=1;i<pts.length;i++)g.lineTo(...pts[i]);
   g.strokeStyle="#1e6243";g.lineWidth=27;g.stroke();
-  g.strokeStyle="#4bc886";g.lineWidth=21;g.stroke();
-  g.strokeStyle="#9aefb4";g.lineWidth=8;g.stroke();g.restore();
+  const gradient=g.createLinearGradient(0,oy,0,oy+449);
+  gradient.addColorStop(0,"#b9ffaf");gradient.addColorStop(.55,"#55db96");gradient.addColorStop(1,"#289f6b");
+  g.strokeStyle=gradient;g.lineWidth=23;g.stroke();
+  g.strokeStyle="#cdffcc";g.lineWidth=6;g.stroke();g.restore();
  }
  pts.slice(1,-1).forEach(([x,y],i)=>{
   if(i%2===0){g.fillStyle="#c5f9be";g.beginPath();g.arc(x,y,3,0,7);g.fill()}
@@ -125,7 +127,9 @@ function drawSnake(){
   g.fillStyle="#9bf3bd";g.beginPath();g.ellipse(5,-5,8,4,-.3,0,7);g.fill();
   for(let ey of [-7,7]){
    g.fillStyle="#fff";g.beginPath();g.arc(7,ey,5,0,7);g.fill();
-   g.fillStyle="#16433a";g.beginPath();g.arc(9,ey,2.6,0,7);g.fill();
+   g.fillStyle="#16433a";g.beginPath();
+   g.ellipse(9,ey,2.6,Math.sin(G.clock*1.8)>.995?.5:2.6,0,0,7);g.fill();
+   g.fillStyle="#fff";g.beginPath();g.arc(9.5,ey-1,1,0,7);g.fill();
   }
   rect(13,-1,2,2,"#16443a");
   if(Math.sin(G.clock*9)>.3){
@@ -138,6 +142,13 @@ function drawSnake(){
   g.save();g.translate(...t);g.rotate(ang);g.fillStyle="#45be7e";
   g.beginPath();g.moveTo(0,-9);g.lineTo(22,0);g.lineTo(0,9);g.closePath();g.fill();g.restore();
  }
+ // Moving fireflies and ambient atmosphere rather than a static grid.
+ for(let i=0;i<22;i++){
+   const xx=ox+((i*67+G.clock*(i%2?8:-6)+8400)%840),
+         yy=oy+((i*91+Math.sin(G.clock*.8+i)*9+4480)%448);
+   g.globalAlpha=.12+Math.abs(Math.sin(G.clock*1.2+i))*.25;
+   rect(xx,yy,2+(i%5===0),2+(i%5===0),"#e4ffc0");
+ }g.globalAlpha=1;
  txt("SNAKE  •  PYTHON",60,28,"#a0f4c0",16);
  txt("PONTOS  "+G.score,703,28,"#d5fff3",16);
  st.textContent="Pontos: "+G.score;
