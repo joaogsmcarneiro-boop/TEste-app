@@ -282,10 +282,14 @@ function drawSnake(){
  txt("PONTOS  "+G.score,703,28,"#d5fff3",16);
  st.textContent="Pontos: "+G.score;
 }
-// NEON JUMP 4: infinite platforming, one-hit death, animated mechanics
+// NEON JUMP 11: animated neon runner, accurate hitboxes and extra hazards
 let jp={};
 const JGROUND=427,JSIZE=38;
-const JCOL={black:"#07070a",purple:"#a64dff",yellow:"#ffe15a"};
+const JCOL={
+ black:"#07070a",deep:"#170c2c",purple:"#a64dff",violet:"#7827c6",
+ lavender:"#dbadff",tip:"#f3d5ff",yellow:"#ffe15a",gold:"#e5b536",
+ softYellow:"#fff0a0",blue:"#49bdff",blueDark:"#16578f"
+};
 const J_SCENES=[{name:"PULSO"},{name:"VÉRTICE"},{name:"ÓRBITA"},{name:"ECLIPSE"}];
 function jumpBest(){try{return +localStorage.getItem("neon_jump_best_v3")||0}catch(e){return 0}}
 function saveJumpBest(){if(G.score>jp.best){jp.best=G.score;try{localStorage.setItem("neon_jump_best_v3",G.score)}catch(e){}}}
@@ -294,14 +298,16 @@ function newJump(){
  jp={y:JGROUND-JSIZE,vy:0,grounded:true,angle:0,progress:0,speed:224,time:0,tier:0,theme:0,
  obstacles:[],platforms:[],gaps:[],pads:[],orbs:[],coins:[],sparks:[],last:300,count:0,
  best:jumpBest(),message:"VIDA ÚNICA · CORRIDA INFINITA",messageTime:3,
-  streak:0,streakTime:0,challenges:0,lastChallenge:0,fever:0,runnerFX:0};
+  streak:0,streakTime:0,challenges:0,lastChallenge:0,fever:0,runnerFX:0,
+  landPulse:0,afterimages:[],visualTimer:0};
  for(let i=0;i<5;i++)spawnJump();
 }
 function spawnJump(){
  const n=jp.count++,lev=jp.tier;
  const kinds=lev===0?["spike","platform","gap","crate","saw","pad","orb"]:
-   lev<3?["spike","platform","gap","crate","saw","pad","orb","stairs","double","bridge","moving_saw","crumble"]:
-      ["spike","platform","gap","crate","saw","pad","orb","stairs","double","bridge","totem","moving_saw","crumble","laser"];
+   lev<3?["spike","platform","gap","crate","saw","pad","orb","stairs","double","bridge","moving_saw","crumble","triple","tower"]:
+      ["spike","platform","gap","crate","saw","pad","orb","stairs","double","bridge","totem",
+       "moving_saw","crumble","laser","triple","tower","pendulum","floating_spike"];
  let type=n===0?"spike":n===1?"platform":n===2?"gap":n===3?"pad":kinds[rand(kinds.length)];
  if(type===jp.lastType&&kinds.length>1)type=kinds[(kinds.indexOf(type)+1+rand(kinds.length-1))%kinds.length];
  const spacing=Math.max(505,jp.speed*(2.15+Math.random()*.45))+(n%7===6?180:0);
@@ -311,11 +317,15 @@ function spawnJump(){
  const platform=(xx,yy,w)=>jp.platforms.push({x:xx,y:yy,w,h:16});
  if(type==="spike")hazard("spike",x,JGROUND-43,46,43);
  if(type==="double")hazard("double",x,JGROUND-41,80,41);
+ if(type==="triple")hazard("triple",x,JGROUND-38,105,38);
  if(type==="crate")hazard("crate",x,JGROUND-58,52,58);
  if(type==="saw")hazard("saw",x,JGROUND-58,54,58);
  if(type==="moving_saw")hazard("moving_saw",x,JGROUND-70,54,58);
+ if(type==="pendulum")hazard("pendulum",x,JGROUND-99,58,68);
+ if(type==="floating_spike")hazard("floating_spike",x,JGROUND-132,72,38);
  if(type==="laser")hazard("laser",x,JGROUND-30,105,30);
  if(type==="totem")hazard("totem",x,JGROUND-78,45,78);
+ if(type==="tower")hazard("tower",x,JGROUND-96,49,96);
  if(type==="gap"){jp.gaps.push({x,w:89+Math.min(25,lev*3)});jp.coins.push({x:x+44,y:325,used:false})}
  if(type==="platform"){platform(x,JGROUND-81,205);hazard("spike",x+112,JGROUND-42,46,42);jp.coins.push({x:x+141,y:294,used:false})}
  if(type==="crumble"){
@@ -364,8 +374,8 @@ function hitJump(o,box){
  // Collision is deliberately INSIDE the rendered yellow square.
  // No hidden rectangular collider surrounds the purple triangle.
  const r={x:box.x+5,y:box.y+5,w:box.w-10,h:box.h-10};
- if(o.type==="spike"||o.type==="double"){
-   const n=o.type==="double"?2:1,w=o.w/n;
+ if(o.type==="spike"||o.type==="double"||o.type==="triple"){
+   const n=o.type==="double"?2:o.type==="triple"?3:1,w=o.w/n;
    for(let i=0;i<n;i++){
      const x=o.x+i*w;
      const t=[[x+w/2,o.y+3],[x+4,o.y+o.h-3],[x+w-4,o.y+o.h-3]];
@@ -373,16 +383,22 @@ function hitJump(o,box){
    }
    return false;
  }
+ if(o.type==="floating_spike"){
+   // A ceiling spike points downwards. Both the visual and hitbox bob together.
+   const y=o.y+Math.sin(jp.time*2.4+o.x*.005)*7;
+   return polygonAgainstRect([[o.x+5,y+5],[o.x+o.w-5,y+5],[o.x+o.w/2,y+o.h-4]],r);
+ }
  if(o.type==="laser"){
    // Only the visible energized strip is dangerous, not its inactive posts.
    return Math.sin(jp.time*2.6+o.x*.011)>.38 &&
      jOverlap(r,{x:o.x+13,y:o.y+9,w:o.w-26,h:o.h-18});
  }
- if(o.type==="moving_saw"||o.type==="saw"){
-   const cx=o.x+o.w/2;
-   const cy=JGROUND-31+(o.type==="moving_saw"?Math.sin(jp.time*3+o.x*.01)*19:0);
+ if(o.type==="moving_saw"||o.type==="saw"||o.type==="pendulum"){
+   const cx=o.x+o.w/2+(o.type==="pendulum"?Math.sin(jp.time*2.3+o.x*.013)*19:0);
+   const cy=o.type==="pendulum"?o.y+o.h/2+Math.cos(jp.time*2.8+o.x*.01)*25:
+      JGROUND-31+(o.type==="moving_saw"?Math.sin(jp.time*3+o.x*.01)*19:0);
    const px=Math.max(r.x,Math.min(cx,r.x+r.w)),py=Math.max(r.y,Math.min(cy,r.y+r.h));
-   return (cx-px)**2+(cy-py)**2<18**2;
+   return (cx-px)**2+(cy-py)**2<(o.type==="pendulum"?17:18)**2;
  }
  // Solid obstacles use inset geometry; platforms are safe to land upon.
  const solid={x:o.x+7,y:o.y+6,w:o.w-14,h:o.h-11};
@@ -401,6 +417,14 @@ function updateJump(dt){
  for(const key of ["obstacles","platforms","gaps","pads"])jp[key]=jp[key].filter(x=>x.x+(x.w||0)>jp.progress-210);
  for(const key of ["coins","orbs"])jp[key]=jp[key].filter(x=>x.x>jp.progress-210&&!x.used);
  jp.messageTime=Math.max(0,jp.messageTime-dt);
+ jp.landPulse=Math.max(0,jp.landPulse-dt);
+ jp.visualTimer+=dt;
+ if(!jp.grounded&&jp.visualTimer>.045){
+   jp.visualTimer=0;
+   jp.afterimages.push({x:185,y:jp.y+JSIZE/2,angle:jp.angle,t:.24});
+ }
+ for(const tr of jp.afterimages){tr.t-=dt;tr.x-=jp.speed*dt}
+ jp.afterimages=jp.afterimages.filter(tr=>tr.t>0).slice(-14);
  jp.streakTime=Math.max(0,jp.streakTime-dt);
  jp.runnerFX=Math.max(0,jp.runnerFX-dt);
  jp.fever=Math.max(0,jp.fever-dt);
@@ -427,7 +451,10 @@ function updateJump(dt){
    }
  }
  if(Number.isFinite(surface)){
-   if(!jp.grounded)spark(185,surface-2, JCOL.yellow,5);
+   if(!jp.grounded){
+     jp.landPulse=.18;
+     spark(185,surface-2,JCOL.yellow,7);
+   }
    jp.y=surface-JSIZE;jp.vy=0;jp.grounded=true;
  }else jp.grounded=false;
  for(const p of jp.pads){
