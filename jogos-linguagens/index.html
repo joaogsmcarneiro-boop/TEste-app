@@ -338,6 +338,22 @@ function drawJump(){
  g.shadowColor=scene.accent;g.shadowBlur=16;rect(-19,-19,38,38,scene.accent);g.shadowBlur=0;
  rect(-13,-13,26,26,"#d1faff");rect(-10,-8,7,8,"#22395c");rect(5,-8,7,8,"#22395c");
  rect(-3,6,9,3,"#2b657b");g.restore();
+ // Real-time obstacle telegraph, allowing the player to react without memorizing the stage.
+ const world=jp.progress+185;
+ const next=[...jp.obstacles.map(v=>({x:v.x,type:"OBSTÁCULO"})),
+             ...jp.gaps.map(v=>({x:v.x,type:"ABISMO"})),
+             ...jp.platforms.map(v=>({x:v.x,type:"PLATAFORMA"})),
+             ...jp.pads.map(v=>({x:v.x,type:"TRAMPOLIM"}))]
+             .filter(v=>v.x>world+28).sort((p,q)=>p.x-q.x)[0];
+ if(next){
+   const d=next.x-world;
+   if(d>55&&d<265){
+     const tx=Math.max(360,Math.min(590,185+d-85));
+     g.save();g.globalAlpha=Math.min(1,(265-d)/80);
+     txt(next.type==="TRAMPOLIM"?"TRAMPOLIM AUTOMÁTICO":next.type+"  ·  PULE!",tx,347,"#fff4cd",17);
+     g.restore();
+   }
+ }
  txt("∞ NEON JUMP  ·  VIDA ÚNICA",25,51,"#ecfaff",18);
  txt("DISTÂNCIA "+Math.floor(jp.progress/10)+" m",25,81,"#ecfaff",16);
  txt("VELOCIDADE "+Math.round(jp.speed),744,52,"#eefaff",16);
