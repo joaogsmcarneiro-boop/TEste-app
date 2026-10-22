@@ -36,7 +36,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 .controlR{display:flex;flex-wrap:wrap;gap:8px}
 .action{width:76px;height:54px;font-size:13px}.info{margin-top:14px;padding:16px 18px;background:#141e32;border:1px solid #344963;border-radius:13px;line-height:1.55;color:#c6d8e9;font-size:14px}
 .info b{color:#fff}footer{margin-top:20px;font-size:12px;color:#96aac4;text-align:center}
-@media(max-width:580px){main{padding:15px 9px 35px}.meta{padding:11px}.canvasWrap{min-height:190px}.overlayBox{padding:15px}.controls{justify-content:center}.toolbar{justify-content:center}.hints{font-size:12px}.pad{grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,45px)}.action{width:66px}}
+.upgradeChoices{display:grid;gap:8px;margin-top:13px}.upgrade{border:1px solid #6a84ae;background:#253755;color:#fff;border-radius:10px;text-align:left;padding:12px 15px;font-weight:800}.upgrade small{display:block;margin-top:3px;color:#c6d6e8;font-weight:400}.upgrade:hover,.upgrade:active{background:#3a5984}@media(max-width:580px){main{padding:15px 9px 35px}.meta{padding:11px}.canvasWrap{min-height:190px}.overlayBox{padding:15px}.controls{justify-content:center}.toolbar{justify-content:center}.hints{font-size:12px}.pad{grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,45px)}.action{width:66px}}
 </style>
 </head>
 <body>
@@ -49,7 +49,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 </nav>
 <section class="stage">
 <div class="meta"><div><span class="gameTitle" id="gameTitle">Snake</span><span class="tag" id="gameTag">PYTHON</span><div class="sub" id="gameSub"></div></div><div class="stats" id="stats">Pontos: 0</div></div>
-<div class="canvasWrap"><canvas width="960" height="540" id="game" aria-label="Área do jogo"></canvas><div class="over" id="over"><div class="overlayBox"><strong id="overlayTitle">JOGAR</strong><p id="overlayText"></p><button class="primary" id="startBtn">INICIAR JOGO</button></div></div></div>
+<div class="canvasWrap"><canvas width="960" height="540" id="game" aria-label="Área do jogo"></canvas><div class="over" id="over"><div class="overlayBox"><strong id="overlayTitle">JOGAR</strong><p id="overlayText"></p><button class="primary" id="startBtn">INICIAR JOGO</button><div class="upgradeChoices" id="upgradeChoices" style="display:none"><button type="button" class="upgrade" id="upgrade1">♥ 1 · VITALIDADE<small>+3 de vida máxima e cura</small></button><button type="button" class="upgrade" id="upgrade2">⚔ 2 · FORÇA<small>+1 de dano por ataque</small></button><button type="button" class="upgrade" id="upgrade3">✚ 3 · SUPRIMENTOS<small>+2 poções e cura</small></button></div></div></div></div>
 <div class="toolbar"><div class="hints" id="hints">Use setas ou WASD.</div><div class="buttons"><button class="smBtn" id="restartBtn">↻ Reiniciar</button><button class="smBtn" id="pauseBtn">Ⅱ Pausar</button></div></div>
 </section>
 <div class="controls">
@@ -66,12 +66,12 @@ const G={game:"snake",running:false,paused:false,dead:false,last:0,clock:0,score
 const configs={
 snake:{title:"Snake",tag:"PYTHON",sub:"Coma frutas e não bata no próprio corpo",hints:"Setas/WASD: mover a cobrinha",info:"<b>Python · Snake:</b> demonstra listas, variáveis, condições e repetição. Coma os pontos amarelos para crescer. Encostar no corpo ou nas paredes encerra a partida."},
 jump:{title:"Neon Jump",tag:"JAVA",sub:"4 tipos de obstáculos, salto duplo e 5 vidas!",hints:"Espaço / toque: pular · no ar: segundo salto · R: reiniciar",info:"<b>Java · Neon Jump:</b> inspirado em jogos de plataforma rítmica. Obstáculos: espinhos simples, espinhos duplos, caixas e serras giratórias. Agora há <b>5 vidas</b>, <b>salto duplo</b>, mais espaço entre obstáculos e velocidade inicial menor. Pegar estrelas aumenta a pontuação."},
-rpg:{title:"Crystal Quest",tag:"C++",sub:"Colete 3 cristais, lute e abra o portal",hints:"WASD/setas: andar · Espaço: atacar · H: poção · E: portal",info:"<b>C++ · Crystal Quest:</b> demonstra estados, posições em grade, inteligência simples de inimigos, combate e inventário. Encontre 3 cristais e entre no portal à direita."}};
+rpg:{title:"Crystal Quest: Roguelite",tag:"C++",sub:"4 andares aleatórios · evoluções · chefe final",hints:"WASD/setas: mover · Espaço: atacar · H: poção · E: portal · 1/2/3: melhorar",info:"<b>C++ · Crystal Quest: Roguelite:</b> quatro andares gerados a cada partida, inimigos variados, poções, chefe final e escolha de poderes entre andares. Se morrer, recomeça. Os fragmentos coletados ficam guardados no navegador e aumentam a vida inicial: +1 a cada 12, até +4."}};
 function select(which){G.game=which;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset()}
 function pop(title,msg,btn="JOGAR"){document.getElementById("overlayTitle").textContent=title;document.getElementById("overlayText").textContent=msg;document.getElementById("startBtn").textContent=btn;over.style.display="flex"}
 function hide(){over.style.display="none"}
 function rand(n){return Math.floor(Math.random()*n)}
-function reset(){G.running=false;G.paused=false;G.dead=false;G.score=0;G.clock=0;G.last=0;keys.clear();document.getElementById("pauseBtn").textContent="Ⅱ Pausar";if(G.game==="snake")newSnake();else if(G.game==="jump")newJump();else newRpg();pop(configs[G.game].title,G.game==="snake"?"Coma as frutas amarelas.\nEvite paredes e o próprio corpo!":G.game==="jump"?"Pule sobre os 4 tipos de obstáculos!\nUse o salto duplo e as 5 vidas para vencer.":"Colete 3 cristais, derrote monstros e encontre o portal.","INICIAR JOGO");draw()}
+function reset(){document.getElementById("upgradeChoices").style.display="none";document.getElementById("startBtn").style.display="";G.running=false;G.paused=false;G.dead=false;G.score=0;G.clock=0;G.last=0;keys.clear();document.getElementById("pauseBtn").textContent="Ⅱ Pausar";if(G.game==="snake")newSnake();else if(G.game==="jump")newJump();else newRpg();pop(configs[G.game].title,G.game==="snake"?"Coma as frutas amarelas.\nEvite paredes e o próprio corpo!":G.game==="jump"?"Pule sobre os 4 tipos de obstáculos!\nUse o salto duplo e as 5 vidas para vencer.":"Supere 4 andares, encontre cristais e derrote o guardião final.","INICIAR JOGO");draw()}
 function start(){if(G.dead){reset()}G.running=true;G.paused=false;hide();G.last=performance.now();requestAnimationFrame(frame)}
 function finish(title,msg){G.running=false;G.dead=true;pop(title,msg,"JOGAR NOVAMENTE")}
 function pause(){if(!G.running){if(G.paused){G.paused=false;G.running=true;hide();G.last=performance.now();requestAnimationFrame(frame)}return}G.running=false;G.paused=true;pop("PAUSADO","Seu progresso está preservado.","CONTINUAR")}
@@ -273,75 +273,232 @@ function drawJump(){
   txt("★ "+jp.bonus+"   PONTOS "+G.score,735,59,"#ffe1a3",15);
   st.textContent="♥ "+jp.lives+" | "+prog+"% | ★ "+jp.bonus;
 }
-// RPG
+// CRYSTAL QUEST: ROGUELITE EDITION
 let rp={};const T=40,ox=80,oy=30,tilesX=20,tilesY=12;
-function newRpg(){rp={p:{x:2,y:6,hp:6,max:6,dir:[1,0]},walls:new Set(),monsters:[{x:9,y:2,hp:3},{x:15,y:4,hp:3},{x:11,y:9,hp:3},{x:17,y:10,hp:3}],gems:[{x:4,y:2},{x:12,y:4},{x:15,y:9}],got:0,potions:2,attackAt:0,walkAt:0,enemyAt:0,flash:0};for(let x=0;x<20;x++){rp.walls.add(x+",0");rp.walls.add(x+",11")}for(let y=0;y<12;y++){rp.walls.add("0,"+y);rp.walls.add("19,"+y)}rp.walls.delete("19,6");for(const [x,y] of [[7,2],[7,3],[7,4],[7,5],[3,8],[4,8],[5,8],[12,7],[13,7],[14,7],[16,2],[16,3]])rp.walls.add(x+","+y)}
-function hitWall(x,y){return x<1||x>18||y<1||y>10||rp.walls.has(x+","+y)}
-function moveRpg(dx,dy){if(!G.running)return;rp.p.dir=[dx,dy];let x=rp.p.x+dx,y=rp.p.y+dy;if(x===19&&y===6){exitRpg();return}if(hitWall(x,y))return;rp.p.x=x;rp.p.y=y;let n=rp.gems.findIndex(v=>v.x===x&&v.y===y);if(n>=0){rp.gems.splice(n,1);rp.got+=1;G.score+=100}for(const e of rp.monsters){if(e.x===x&&e.y===y)damage()} }
-function damage(){rp.p.hp--;rp.flash=.25;if(rp.p.hp<=0)finish("HERÓI DERROTADO","Colete cristais, mas evite os monstros!")}
-function attackRpg(){if(!G.running)return;rp.attackAt=.22;let {x,y,dir}=rp.p;for(const e of rp.monsters){if(Math.abs(e.x-x)<=1&&Math.abs(e.y-y)<=1)e.hp-=1}let dead=rp.monsters.filter(v=>v.hp<=0);G.score+=dead.length*40;rp.monsters=rp.monsters.filter(v=>v.hp>0)}
-function potion(){if(rp.potions>0&&rp.p.hp<rp.p.max&&G.running){rp.potions--;rp.p.hp=Math.min(rp.p.max,rp.p.hp+3)}}
-function exitRpg(){if(rp.p.x>=17&&rp.p.y===6&&rp.got===3){finish("MISSÃO COMPLETA!","Você coletou os 3 cristais e escapou!");return}if(rp.p.x>=17&&rp.p.y===6)rp.flash=.2}
-function updateRpg(dt){rp.attackAt=Math.max(0,rp.attackAt-dt);rp.flash=Math.max(0,rp.flash-dt);rp.enemyAt+=dt;rp.walkAt+=dt;if(rp.walkAt>.12){rp.walkAt=0;const dirs=[[0,-1],[0,1],[-1,0],[1,0]];for(const [dx,dy,key] of [[0,-1,"ArrowUp"],[0,1,"ArrowDown"],[-1,0,"ArrowLeft"],[1,0,"ArrowRight"]])if(keys.has(key)){moveRpg(dx,dy);break}}if(rp.enemyAt>.75){rp.enemyAt=0;for(const e of rp.monsters){let dx=Math.sign(rp.p.x-e.x),dy=Math.sign(rp.p.y-e.y);let choices=Math.abs(rp.p.x-e.x)>Math.abs(rp.p.y-e.y)?[[dx,0],[0,dy]]:[[0,dy],[dx,0]];let stepped=false;if(Math.abs(rp.p.x-e.x)+Math.abs(rp.p.y-e.y)<7)for(const [a,b] of choices){if(!stepped&&(a||b)&&!hitWall(e.x+a,e.y+b)){e.x+=a;e.y+=b;stepped=true}}if(e.x===rp.p.x&&e.y===rp.p.y)damage()}}}
-function drawRpg(){
-  const grad=g.createLinearGradient(0,0,960,540);grad.addColorStop(0,"#0b1625");grad.addColorStop(1,"#1c2344");rect(0,0,960,540,grad);
-  for(let y=0;y<12;y++)for(let x=0;x<20;x++){
-    const px=ox+x*T,py=oy+y*T;
-    const dark=(x+y)%2===0;
-    rect(px,py,T-1,T-1,dark?"#283d4e":"#243748");
-    if((x*13+y*7)%9===0)rect(px+12,py+13,9,2,"#476372");
-    if(rp.walls.has(x+","+y)){
-      rect(px+1,py+1,38,38,"#526579");rect(px+3,py+3,34,28,"#738398");
-      rect(px+3,py+16,34,3,"#49566d");rect(px+17,py+2,3,15,"#49566d");
-      rect(px+1,py+31,38,8,"#374354");
+const themes=[
+["BOSQUE PERDIDO","#204338","#284f41","#668879","#91e9b3"],
+["CATACUMBAS","#2d3151","#373a59","#77758c","#b89ef6"],
+["CAVERNAS DE BRASA","#4a3337","#523a3c","#94756b","#ffb88e"],
+["TRONO DO GUARDIÃO","#273a50","#2e4258","#7c90a6","#91e9ff"]];
+let progress={shards:0,best:1,wins:0};
+try{const v=JSON.parse(localStorage.getItem("crystal_quest_roguelite_v3")||"null");if(v&&Number.isFinite(v.shards))progress={shards:Math.max(0,v.shards),best:v.best||1,wins:v.wins||0}}catch(e){}
+function saveProgress(){try{localStorage.setItem("crystal_quest_roguelite_v3",JSON.stringify(progress))}catch(e){}}
+function announce(s){rp.note=s;rp.noteTime=2.3}
+function pos(x,y){return x+","+y}
+function walkable(x,y){return x>0&&x<19&&y>0&&y<11&&!rp.walls.has(pos(x,y))}
+function flood(){
+  const q=[[2,6]],seen=new Set(["2,6"]);let i=0;
+  while(i<q.length){const [x,y]=q[i++];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const a=x+dx,b=y+dy,k=pos(a,b);if(walkable(a,b)&&!seen.has(k)){seen.add(k);q.push([a,b])}}}
+  return q;
+}
+function makeFloor(n){
+  rp.floor=n;rp.got=0;rp.needed=n===4?3:2;
+  rp.mobs=[];rp.crystals=[];rp.items=[];rp.p.x=2;rp.p.y=6;rp.p.dir=[1,0];
+  rp.atk=0;rp.cd=0;rp.inv=1.4;rp.enemyTick=0;rp.moveTick=0;rp.choosing=false;
+  rp.walls=new Set();
+  for(let x=0;x<20;x++){rp.walls.add(pos(x,0));rp.walls.add(pos(x,11))}
+  for(let y=0;y<12;y++){rp.walls.add(pos(0,y));rp.walls.add(pos(19,y))}
+  rp.walls.delete("19,6");
+  for(let i=0;i<12+n*2;i++){
+    const x=4+rand(13),y=1+rand(10),k=pos(x,y);
+    if(x>15&&Math.abs(y-6)<2)continue;
+    rp.walls.add(k);
+    if(!flood().some(v=>v[0]===18&&v[1]===6))rp.walls.delete(k);
+  }
+  const available=flood().filter(([x,y])=>x>=5&&x<=17);
+  const used=new Set(["18,6","17,6","18,5","18,7"]);
+  function spot(){
+    const opts=available.filter(v=>!used.has(pos(...v)));
+    const p=opts[rand(opts.length)];
+    if(!p)return null;
+    used.add(pos(...p));return{x:p[0],y:p[1]};
+  }
+  for(let i=0;i<rp.needed;i++){const p=spot();if(p)rp.crystals.push(p)}
+  for(let i=0;i<n+3;i++){
+    const p=spot();if(!p)break;
+    const type=n===4&&i===0?"boss":["slime","bat","guard"][(i+n)%3];
+    const hp=type==="boss"?12:type==="guard"?5:type==="bat"?2:3;
+    rp.mobs.push({...p,type,hp,max:hp,cool:0});
+  }
+  for(let i=0;i<2+n;i++){const p=spot();if(p)rp.items.push({...p,type:i===0?"potion":"shard"})}
+  progress.best=Math.max(progress.best,n);saveProgress();
+  announce(n===4?"CHEFE FINAL: O GUARDIÃO!":"ANDAR "+n+" - COLETE OS CRISTAIS!");
+}
+function newRpg(){
+  const plus=Math.min(4,Math.floor(progress.shards/12));
+  rp={p:{x:2,y:6,hp:8+plus,max:8+plus,damage:1,level:1,dir:[1,0]},
+    floor:1,shards:0,kills:0,potions:2,note:"",noteTime:0,inv:0,
+    cd:0,atk:0,enemyTick:0,moveTick:0,choosing:false,mobs:[],crystals:[],items:[],walls:new Set()};
+  makeFloor(1);
+}
+function hitWall(x,y){return !walkable(x,y)}
+function pickUp(){
+  let ix=rp.crystals.findIndex(v=>v.x===rp.p.x&&v.y===rp.p.y);
+  if(ix>=0){rp.crystals.splice(ix,1);rp.got++;G.score+=100;announce("CRISTAL "+rp.got+"/"+rp.needed)}
+  ix=rp.items.findIndex(v=>v.x===rp.p.x&&v.y===rp.p.y);
+  if(ix>=0){
+    const v=rp.items.splice(ix,1)[0];
+    if(v.type==="potion"){rp.potions++;announce("POÇÃO ENCONTRADA")}
+    else{rp.shards+=3;G.score+=25;announce("+3 FRAGMENTOS")}
+  }
+}
+function moveRpg(dx,dy){
+  if(!G.running)return;
+  rp.p.dir=[dx,dy];
+  const nx=rp.p.x+dx,ny=rp.p.y+dy;
+  if(nx===19&&ny===6){exitRpg();return}
+  if(hitWall(nx,ny))return;
+  if(rp.mobs.some(e=>e.x===nx&&e.y===ny)){attackRpg();return}
+  rp.p.x=nx;rp.p.y=ny;pickUp();
+}
+function endExpedition(win){
+  progress.shards+=rp.shards;
+  if(win)progress.wins++;
+  saveProgress();
+  finish(win?"VITÓRIA! 4 ANDARES!":"EXPEDIÇÃO ENCERRADA",
+    "Andar alcançado: "+rp.floor+"/4\nFragmentos obtidos: "+rp.shards+
+    "\nTotal salvo no navegador: "+progress.shards+
+    "\nCada 12 fragmentos dão +1 de vida inicial (até +4).");
+}
+function damage(n){
+  if(rp.inv>0||!G.running)return;
+  rp.p.hp=Math.max(0,rp.p.hp-n);rp.inv=1.1;announce("-"+n+" VIDA");
+  if(rp.p.hp<=0)endExpedition(false);
+}
+function attackRpg(){
+  if(!G.running||rp.cd>0)return;
+  rp.atk=.24;rp.cd=.33;
+  for(const e of rp.mobs){
+    if(Math.abs(e.x-rp.p.x)<=1&&Math.abs(e.y-rp.p.y)<=1)e.hp-=rp.p.damage;
+  }
+  const defeated=rp.mobs.filter(e=>e.hp<=0);
+  defeated.forEach(e=>{G.score+=e.type==="boss"?500:50;rp.shards+=e.type==="boss"?10:1;rp.kills++});
+  if(defeated.some(e=>e.type==="boss"))announce("O GUARDIÃO FOI DERROTADO!");
+  rp.mobs=rp.mobs.filter(e=>e.hp>0);
+}
+function potion(){
+  if(G.running&&rp.potions>0&&rp.p.hp<rp.p.max){
+    rp.potions--;rp.p.hp=Math.min(rp.p.max,rp.p.hp+4);announce("+4 VIDA");
+  }
+}
+function portalReady(){return rp.got>=rp.needed&&(rp.floor<4||!rp.mobs.some(e=>e.type==="boss"))}
+function exitRpg(){
+  if(!G.running)return;
+  if(rp.p.x<17||Math.abs(rp.p.y-6)>1){announce("VÁ ATÉ O PORTAL À DIREITA!");return}
+  if(!portalReady()){announce(rp.got<rp.needed?"FALTAM "+(rp.needed-rp.got)+" CRISTAIS!":"DERROTE O CHEFE!");return}
+  rp.shards+=3;
+  if(rp.floor===4){endExpedition(true);return}
+  rp.choosing=true;G.running=false;
+  pop("ANDAR "+rp.floor+" CONCLUÍDO","Escolha seu poder para o próximo andar:");
+  document.getElementById("startBtn").style.display="none";
+  document.getElementById("upgradeChoices").style.display="grid";
+}
+function chooseUpgrade(i){
+  if(G.game!=="rpg"||!rp.choosing)return;
+  if(i===1){rp.p.max+=3;rp.p.hp=Math.min(rp.p.max,rp.p.hp+5)}
+  if(i===2)rp.p.damage++;
+  if(i===3){rp.potions+=2;rp.p.hp=Math.min(rp.p.max,rp.p.hp+2)}
+  rp.p.level++;
+  document.getElementById("startBtn").style.display="";
+  document.getElementById("upgradeChoices").style.display="none";
+  makeFloor(rp.floor+1);hide();G.running=true;G.last=performance.now();requestAnimationFrame(frame);
+}
+function updateRpg(dt){
+  rp.atk=Math.max(0,rp.atk-dt);rp.cd=Math.max(0,rp.cd-dt);
+  rp.inv=Math.max(0,rp.inv-dt);rp.noteTime=Math.max(0,rp.noteTime-dt);
+  rp.moveTick+=dt;rp.enemyTick+=dt;
+  if(rp.moveTick>.14){
+    rp.moveTick=0;
+    const directions={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
+    for(const k of ["ArrowUp","KeyW","ArrowDown","KeyS","ArrowLeft","KeyA","ArrowRight","KeyD"])
+      if(keys.has(k)){moveRpg(...directions[k]);break}
+  }
+  if(!G.running)return;
+  if(rp.enemyTick>.98-rp.floor*.08){
+    rp.enemyTick=0;
+    for(const e of rp.mobs){
+      e.cool=Math.max(0,e.cool-.85);
+      const dx=rp.p.x-e.x,dy=rp.p.y-e.y,d=Math.abs(dx)+Math.abs(dy);
+      if(d<=1){
+        if(e.cool===0){damage(e.type==="boss"?2:1);e.cool=1.2}
+        if(!G.running)return;
+        continue;
+      }
+      if(d>(e.type==="bat"?10:8))continue;
+      const moves=Math.abs(dx)>=Math.abs(dy)?[[Math.sign(dx),0],[0,Math.sign(dy)]]:[[0,Math.sign(dy)],[Math.sign(dx),0]];
+      for(const [sx,sy] of moves){
+        const nx=e.x+sx,ny=e.y+sy;
+        if((sx||sy)&&walkable(nx,ny)&&!(nx===rp.p.x&&ny===rp.p.y)&&!rp.mobs.some(z=>z!==e&&z.x===nx&&z.y===ny)){e.x=nx;e.y=ny;break}
+      }
     }
   }
-  // torches, portal and floating crystals
-  for(const [tx,ty] of [[6,1],[10,10],[17,2]]){
-    const x=ox+tx*T+16,y=oy+ty*T+8;
-    g.save();g.shadowColor="#ffac4d";g.shadowBlur=17;
-    rect(x,y,8,16,"#99674d");g.fillStyle="#ffc768";g.beginPath();g.ellipse(x+4,y-2,6,9,0,0,Math.PI*2);g.fill();g.restore();
+}
+function drawRpg(){
+  const theme=themes[rp.floor-1],bgc=g.createLinearGradient(0,0,960,540);
+  bgc.addColorStop(0,"#0c182a");bgc.addColorStop(1,"#151f35");rect(0,0,960,540,bgc);
+  for(let y=0;y<12;y++)for(let x=0;x<20;x++){
+    const px=ox+x*T,py=oy+y*T;
+    rect(px,py,T-1,T-1,(x+y)%2?theme[1]:theme[2]);
+    if((x*11+y*7)%13===0)rect(px+9,py+15,13,2,"#ffffff15");
+    if(rp.walls.has(pos(x,y))){
+      rect(px+1,py+1,38,38,"#253247");
+      rect(px+2,py+2,36,29,theme[3]);
+      rect(px+4,py+17,31,3,"#283b54");
+      rect(px+17,py+2,3,14,"#3a4d62");
+      rect(px,py+31,39,8,"#253247");
+    }
   }
-  const portX=ox+19*T,portY=oy+6*T;
-  g.save();g.shadowColor=rp.got===3?"#42edc3":"#bb8cff";g.shadowBlur=25;
-  rect(portX-1,portY,41,40,rp.got===3?"#42dcb6":"#896ad2");
-  rect(portX+8,portY+6,26,30,rp.got===3?"#134e51":"#3a2c63");
-  txt("◈",portX+8,portY+29,"#efffff",25);g.restore();
-  for(const b of rp.gems){
-    const x=ox+b.x*T+20,y=oy+b.y*T+20+Math.sin(G.clock*4+b.x)*3;
-    g.save();g.shadowColor="#ffe776";g.shadowBlur=16;
-    g.fillStyle="#ffe57b";g.beginPath();g.moveTo(x,y-14);g.lineTo(x+12,y);g.lineTo(x,y+14);g.lineTo(x-12,y);g.closePath();g.fill();
-    g.shadowBlur=0;g.fillStyle="#fff5c4";g.beginPath();g.moveTo(x,y-10);g.lineTo(x+6,y);g.lineTo(x,y);g.closePath();g.fill();g.restore();
+  for(const [tx,ty] of [[3,2],[11,2],[15,9]]){
+    const x=ox+tx*T+15,y=oy+ty*T+12;
+    if(rp.walls.has(pos(tx,ty)))continue;
+    g.save();g.shadowBlur=16;g.shadowColor="#ffae64";
+    rect(x,y,8,17,"#af7256");g.fillStyle="#ffc777";g.beginPath();g.ellipse(x+4,y-5,6,9,0,0,7);g.fill();g.restore();
   }
-  for(const e of rp.monsters){
-    const x=ox+e.x*T+5,y=oy+e.y*T+7;
-    rect(x+3,y+23,27,7,"#152333");rect(x,y,30,30,"#cb6a90");
-    rect(x+4,y-6,7,9,"#f6a6bd");rect(x+19,y-6,7,9,"#f6a6bd");
-    rect(x+5,y+9,8,8,"#382d4d");rect(x+18,y+9,8,8,"#382d4d");
-    rect(x+8,y+11,3,4,"#ffebd4");rect(x+21,y+11,3,4,"#ffebd4");
-    rect(x,y-11,30,4,"#303b53");rect(x,y-11,30*e.hp/3,4,"#ff977f");
+  const xPortal=ox+19*T,yPortal=oy+6*T;
+  g.save();g.shadowBlur=25;g.shadowColor=portalReady()?"#62edb9":"#a889ff";
+  rect(xPortal-2,yPortal,42,40,portalReady()?"#55deb8":"#9163cc");
+  rect(xPortal+5,yPortal+6,30,29,portalReady()?"#164f48":"#3d2a5e");
+  txt("◈",xPortal+8,yPortal+28,"#fff",25);g.restore();
+  for(const v of rp.items){
+    const x=ox+v.x*T+20,y=oy+v.y*T+20+Math.sin(G.clock*4+v.x)*3;
+    g.save();g.shadowColor=v.type==="potion"?"#ff849f":"#a1edff";g.shadowBlur=12;
+    if(v.type==="potion"){rect(x-8,y-8,16,17,"#ee7597");rect(x-4,y-13,8,6,"#fff1dd")}
+    else{g.fillStyle="#81eafa";g.beginPath();g.moveTo(x,y-13);g.lineTo(x+10,y);g.lineTo(x,y+12);g.lineTo(x-10,y);g.closePath();g.fill()}
+    g.restore();
   }
-  const x=ox+rp.p.x*T+4,y=oy+rp.p.y*T+4;
-  rect(x+2,y+29,29,5,"#101f32");
-  rect(x+3,y+7,28,23,rp.flash>0?"#fff":"#46c7f3");
-  rect(x+6,y-4,23,10,"#b88957");rect(x+7,y+4,20,13,"#f7d9ba");
-  rect(x+18,y+9,4,4,"#142035");
-  rect(x+2,y+15,7,11,"#4176b2");rect(x+25,y+15,7,11,"#4176b2");
-  if(rp.attackAt>0){
-    g.save();g.shadowColor="#ffe38a";g.shadowBlur=12;g.strokeStyle="#ffe38a";g.lineWidth=5;
-    g.beginPath();g.arc(x+16,y+16,36,-1.1,1.5);g.stroke();g.restore();
+  for(const v of rp.crystals){
+    const x=ox+v.x*T+20,y=oy+v.y*T+20+Math.sin(G.clock*4+v.x)*3;
+    g.save();g.shadowColor="#ffe889";g.shadowBlur=17;g.fillStyle="#ffe37b";
+    g.beginPath();g.moveTo(x,y-14);g.lineTo(x+11,y);g.lineTo(x,y+14);g.lineTo(x-11,y);g.closePath();g.fill();g.restore();
   }
-  rect(80,512,800,22,"#0c1b2e");
-  txt("VIDA "+ "♥".repeat(Math.max(0,rp.p.hp))+"♡".repeat(6-Math.max(0,rp.p.hp))+
-      "   CRISTAIS "+rp.got+"/3   POÇÕES "+rp.potions,96,529,"#f1f5ff",15);
-  st.textContent="Cristais: "+rp.got+"/3  |  Vida: "+rp.p.hp+"/6";
+  for(const e of rp.mobs){
+    const x=ox+e.x*T+5,y=oy+e.y*T+6;
+    if(e.type==="slime"){rect(x,y+13,31,18,"#4fb27e");rect(x+5,y+6,21,15,"#93eeb1")}
+    else if(e.type==="bat"){rect(x-3,y+9,17,14,"#765cad");rect(x+20,y+9,17,14,"#765cad");rect(x+9,y+4,14,26,"#c1a6ee")}
+    else if(e.type==="guard"){rect(x+2,y+6,29,24,"#b59aa2");rect(x+8,y-4,16,19,"#ded0d5")}
+    else{g.save();g.shadowColor="#d5a9ff";g.shadowBlur=17;rect(x-5,y+7,40,25,"#a671d8");rect(x+1,y-7,29,22,"#d1b5ff");rect(x-3,y-9,9,12,"#f2dcff");rect(x+24,y-9,9,12,"#f2dcff");g.restore()}
+    rect(x+8,y+14,5,5,"#20223f");rect(x+21,y+14,5,5,"#20223f");
+    rect(x-1,y-13,33,4,"#192438");rect(x-1,y-13,33*e.hp/e.max,4,e.type==="boss"?"#db9ffd":"#ff9e8d");
+  }
+  const px=ox+rp.p.x*T+4,py=oy+rp.p.y*T+4;
+  g.save();if(rp.inv>0&&Math.floor(G.clock*12)%2===0)g.globalAlpha=.42;
+  rect(px+3,py+8,28,25,"#3db7ed");rect(px+6,py-4,23,11,"#ba895f");rect(px+7,py+4,20,13,"#f9d9b8");
+  rect(px+18,py+9,4,4,"#19263b");rect(px+3,py+17,7,13,"#4979ad");rect(px+25,py+17,7,13,"#4979ad");
+  if(rp.atk>0){g.shadowColor="#ffe8a5";g.shadowBlur=15;g.strokeStyle="#ffe59d";g.lineWidth=5;g.beginPath();g.arc(px+16,py+15,34,-1,1.7);g.stroke()}
+  g.restore();
+  rect(80,511,800,26,"#0c1527");
+  txt("VIDA "+rp.p.hp+"/"+rp.p.max+"  ⚔ "+rp.p.damage+"   CRISTAIS "+rp.got+"/"+rp.needed+"   POÇÕES "+rp.potions+"   FRAG. "+rp.shards,90,530,"#f1f6ff",15);
+  txt("ANDAR "+rp.floor+"/4 · "+theme[0]+" · NV "+rp.p.level,81,21,theme[4],16);
+  if(rp.noteTime>0){rect(280,44,440,41,"#122039eb");txt(rp.note,292,70,"#ffe9b4",17)}
+  st.textContent="Andar "+rp.floor+"/4 · ♥ "+rp.p.hp+"/"+rp.p.max+" · Cristais "+rp.got+"/"+rp.needed;
 }
 function draw(){if(G.game==="snake")drawSnake();if(G.game==="jump")drawJump();if(G.game==="rpg")drawRpg()}
-function control(key){if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")exitRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
+function control(key){if(G.game==="rpg"&&rp.choosing){if(["Digit1","Digit2","Digit3"].includes(key))chooseUpgrade(Number(key.slice(-1)));return}if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")exitRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
 window.addEventListener("keydown",e=>{let k=e.code;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(k))e.preventDefault();if(keys.has(k)&&e.repeat)return;keys.add(k);control(k)});
 window.addEventListener("keyup",e=>keys.delete(e.code));window.addEventListener("blur",()=>keys.clear());
 document.querySelectorAll("[data-key]").forEach(b=>{b.addEventListener("pointerdown",e=>{e.preventDefault();keys.add(b.dataset.key);control(b.dataset.key)});for(const ev of ["pointerup","pointercancel","pointerleave"])b.addEventListener(ev,()=>keys.delete(b.dataset.key))});
 c.addEventListener("pointerdown",e=>{e.preventDefault();if(G.game==="jump")jump();else if(G.game==="rpg")attackRpg()});
+for(let n=1;n<=3;n++)document.getElementById("upgrade"+n).onclick=()=>chooseUpgrade(n);
 document.getElementById("startBtn").onclick=()=>{if(G.paused){G.paused=false;G.running=true;hide();G.last=performance.now();requestAnimationFrame(frame)}else start()};
 document.getElementById("restartBtn").onclick=()=>{reset();start()};
 document.getElementById("pauseBtn").onclick=()=>{if(G.running||G.paused)pause()};
