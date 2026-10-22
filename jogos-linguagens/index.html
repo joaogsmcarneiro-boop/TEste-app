@@ -54,7 +54,7 @@ canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;im
 </section>
 <div class="controls">
 <div class="pad"><span></span><button class="touch" data-key="ArrowUp">▲</button><span></span><button class="touch" data-key="ArrowLeft">◀</button><button class="touch" data-key="ArrowDown">▼</button><button class="touch" data-key="ArrowRight">▶</button></div>
-<div class="controlR"><button class="touch action" data-key="Space">PULAR / ATACAR</button><button class="touch action" data-key="KeyH">CURA</button><button class="touch action" data-key="KeyE">PORTA</button></div>
+<div class="controlR"><button class="touch action" data-key="Space">PULAR / ATACAR</button><button class="touch action" data-key="KeyH">CURA</button><button class="touch action" data-key="KeyE">PORTAL</button><button class="touch action" data-key="ShiftLeft">ESQUIVA</button><button class="touch action" data-key="KeyF">MAGIA</button></div>
 </div>
 <div class="info" id="info"></div>
 <footer>Versões para navegador inspiradas nos projetos originais em Python, Java e C++. A execução aqui usa JavaScript e HTML Canvas.</footer>
@@ -66,7 +66,7 @@ const G={game:"snake",running:false,paused:false,dead:false,last:0,clock:0,score
 const configs={
 snake:{title:"Snake",tag:"PYTHON",sub:"Coma frutas e não bata no próprio corpo",hints:"Setas/WASD: mover a cobrinha",info:"<b>Python · Snake:</b> demonstra listas, variáveis, condições e repetição. Coma os pontos amarelos para crescer. Encostar no corpo ou nas paredes encerra a partida."},
 jump:{title:"Neon Jump ∞",tag:"JAVA",sub:"Corrida infinita · obstáculos aleatórios · velocidade crescente",hints:"Espaço / toque: pular (duas vezes = salto duplo) · R: reiniciar",info:"<b>Java · Neon Jump infinito:</b> corrida sem linha de chegada. Seis tipos de obstáculos gerados continuamente (espinhos, duplos, caixas, serras, faixas de energia e totens). Velocidade aumenta a cada 14 segundos; trechos de descanso e distância adaptada à velocidade tornam o desafio justo. Fases visuais, estrelas e recorde local."},
-rpg:{title:"Crystal Quest: Roguelite",tag:"C++",sub:"4 andares aleatórios · evoluções · chefe final",hints:"WASD/setas: mover · Espaço: atacar · H: poção · E: portal · 1/2/3: melhorar",info:"<b>C++ · Crystal Quest: Roguelite:</b> quatro andares gerados a cada partida, inimigos variados, poções, chefe final e escolha de poderes entre andares. Se morrer, recomeça. Os fragmentos coletados ficam guardados no navegador e aumentam a vida inicial: +1 a cada 12, até +4."}};
+rpg:{title:"Crystal Quest: Roguelite",tag:"C++",sub:"Espadas, escudos, botas e magia · combates com esquiva",hints:"WASD: andar · Espaço: atacar · Shift/K: esquiva · F: magia · H: cura · E: portal",info:"<b>Crystal Quest:</b> agora os itens mudam sua jogabilidade: espada (+dano), escudo (redução do dano), botas (esquiva mais rápida), orbes (+magia), poções (cura) e cristais (recarregam magia). Ataque apenas na direção que estiver olhando. A energia de ataque se recupera ao andar. Fuja das áreas vermelhas de ataque e desvie dos projéteis inimigos. Shift = esquiva e F = raio mágico."}};
 function select(which){G.game=which;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.id==="tab-"+which));document.getElementById("gameTitle").textContent=configs[which].title;document.getElementById("gameTag").textContent=configs[which].tag;document.getElementById("gameSub").textContent=configs[which].sub;document.getElementById("hints").textContent=configs[which].hints;document.getElementById("info").innerHTML=configs[which].info;reset()}
 function pop(title,msg,btn="JOGAR"){document.getElementById("overlayTitle").textContent=title;document.getElementById("overlayText").textContent=msg;document.getElementById("startBtn").textContent=btn;over.style.display="flex"}
 function hide(){over.style.display="none"}
@@ -81,49 +81,66 @@ function rect(x,y,w,h,color){g.fillStyle=color;g.fillRect(x,y,w,h)}
 function txt(s,x,y,color="#fff",size=18){g.fillStyle=color;g.font="bold "+size+"px ui-monospace,monospace";g.fillText(s,x,y)}
 // SNAKE
 let sn={};
-function newSnake(){sn={body:[[16,9],[15,9],[14,9]],dir:[1,0],next:[1,0],food:[rand(30),rand(16)],step:0,ate:0};sn.food=nextFood()}
+function newSnake(){sn={body:[[16,9],[15,9],[14,9]],dir:[1,0],next:[1,0],food:[rand(30),rand(16)],step:0,ate:0};sn.food=nextFood();sn.prevBody=sn.body.map(v=>[...v])}
 function nextFood(){let p;do{p=[rand(30),rand(16)]}while(sn.body.some(v=>v[0]===p[0]&&v[1]===p[1]));return p}
 function dirSnake(key){const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d&&(d[0]!==-sn.dir[0]||d[1]!==-sn.dir[1]))sn.next=d}
-function updateSnake(dt){sn.step+=dt;if(sn.step<Math.max(.07,.14-G.score*.002))return;sn.step=0;sn.dir=sn.next;const h=[sn.body[0][0]+sn.dir[0],sn.body[0][1]+sn.dir[1]],eat=h[0]===sn.food[0]&&h[1]===sn.food[1];if(h[0]<0||h[0]>=30||h[1]<0||h[1]>=16||sn.body.slice(0,eat?undefined:-1).some(v=>v[0]===h[0]&&v[1]===h[1])){finish("FIM DE JOGO","Pontos: "+G.score);return}sn.body.unshift(h);if(eat){G.score+=10;sn.food=nextFood()}else sn.body.pop()}
+function updateSnake(dt){sn.step+=dt;if(sn.step<Math.max(.07,.14-G.score*.002))return;sn.step=0;sn.prevBody=sn.body.map(v=>[...v]);sn.dir=sn.next;const h=[sn.body[0][0]+sn.dir[0],sn.body[0][1]+sn.dir[1]],eat=h[0]===sn.food[0]&&h[1]===sn.food[1];if(h[0]<0||h[0]>=30||h[1]<0||h[1]>=16||sn.body.slice(0,eat?undefined:-1).some(v=>v[0]===h[0]&&v[1]===h[1])){finish("FIM DE JOGO","Pontos: "+G.score);return}sn.body.unshift(h);if(eat){G.score+=10;sn.prevBody.push([...sn.prevBody[sn.prevBody.length-1]]);sn.food=nextFood()}else sn.body.pop()}
 function drawSnake(){
-  // gently textured board, fruit, shading and expressive snake
-  const w=28, ox=60,oy=43;
-  const sky=g.createLinearGradient(0,0,0,540);sky.addColorStop(0,"#0d2a37");sky.addColorStop(1,"#071d2d");rect(0,0,960,540,sky);
-  rect(ox-8,oy-8,856,464,"#2a6973");rect(ox-3,oy-3,846,454,"#091d2b");
-  for(let x=0;x<30;x++)for(let y=0;y<16;y++){
-    rect(ox+x*w,oy+y*w,w,w,(x+y)%2?"#134039":"#15463d");
-    if((x*17+y*11)%13===0)rect(ox+x*w+5,oy+y*w+6,3,3,"#387661");
+ const w=28,ox=60,oy=43;
+ const sky=g.createLinearGradient(0,0,960,540);
+ sky.addColorStop(0,"#0c2b3b");sky.addColorStop(1,"#092026");
+ rect(0,0,960,540,sky);
+ g.save();g.shadowColor="#5ae5a9";g.shadowBlur=15;rect(ox-10,oy-10,860,468,"#3d8576");g.restore();
+ rect(ox-5,oy-5,850,458,"#0d3231");
+ for(let x=0;x<30;x++)for(let y=0;y<16;y++){
+  let a=ox+x*w,b=oy+y*w;
+  rect(a,b,w,w,(x+y)%2?"#155344":"#185c4d");
+  if((x*17+y*13)%19===0){rect(a+8,b+7,3,5,"#3e9571");rect(a+5,b+9,8,2,"#3e9571")}
+ }
+ const [fx,fy]=sn.food,X=ox+fx*w+14,Y=oy+fy*w+14+Math.sin(G.clock*5)*2;
+ g.save();g.shadowColor="#ff967b";g.shadowBlur=15;
+ g.fillStyle="#f35c6b";g.beginPath();g.arc(X,Y,11,0,Math.PI*2);g.fill();
+ g.shadowBlur=0;g.fillStyle="#ffb3a9";g.beginPath();g.arc(X-4,Y-3,3.3,0,Math.PI*2);g.fill();
+ rect(X-1,Y-15,3,7,"#684d33");
+ g.fillStyle="#8de6a3";g.beginPath();g.ellipse(X+5,Y-13,7,3,-.4,0,Math.PI*2);g.fill();g.restore();
+ const blend=Math.min(1,sn.step/Math.max(.07,.14-G.score*.002));
+ const pts=sn.body.map((p,i)=>{
+  const prev=(sn.prevBody||sn.body)[i]||p;
+  return [ox+14+w*(prev[0]+(p[0]-prev[0])*blend),oy+14+w*(prev[1]+(p[1]-prev[1])*blend)];
+ });
+ if(pts.length>1){
+  g.save();g.lineCap="round";g.lineJoin="round";
+  g.beginPath();g.moveTo(...pts[0]);for(let i=1;i<pts.length;i++)g.lineTo(...pts[i]);
+  g.strokeStyle="#1e6243";g.lineWidth=27;g.stroke();
+  g.strokeStyle="#4bc886";g.lineWidth=21;g.stroke();
+  g.strokeStyle="#9aefb4";g.lineWidth=8;g.stroke();g.restore();
+ }
+ pts.slice(1,-1).forEach(([x,y],i)=>{
+  if(i%2===0){g.fillStyle="#c5f9be";g.beginPath();g.arc(x,y,3,0,7);g.fill()}
+ });
+ if(pts.length){
+  const [x,y]=pts[0];g.save();g.translate(x,y);g.rotate(Math.atan2(sn.dir[1],sn.dir[0]));
+  g.shadowColor="#b9ffa7";g.shadowBlur=12;g.fillStyle="#55d68a";
+  g.beginPath();g.ellipse(0,0,17,13,0,0,Math.PI*2);g.fill();g.shadowBlur=0;
+  g.fillStyle="#9bf3bd";g.beginPath();g.ellipse(5,-5,8,4,-.3,0,7);g.fill();
+  for(let ey of [-7,7]){
+   g.fillStyle="#fff";g.beginPath();g.arc(7,ey,5,0,7);g.fill();
+   g.fillStyle="#16433a";g.beginPath();g.arc(9,ey,2.6,0,7);g.fill();
   }
-  const [fx,fy]=sn.food, foodX=ox+fx*w+14,foodY=oy+fy*w+14+Math.sin(G.clock*5)*1.7;
-  g.save();g.shadowColor="#ffd85c";g.shadowBlur=14;
-  g.fillStyle="#ffba4d";g.beginPath();g.arc(foodX,foodY,11.5,0,Math.PI*2);g.fill();
-  g.shadowBlur=0;rect(foodX-1,foodY-14,3,5,"#755326");
-  g.fillStyle="#79eea1";g.beginPath();g.ellipse(foodX+5,foodY-12,6,3,-.5,0,7);g.fill();g.restore();
-  sn.body.slice().reverse().forEach(([x,y],rev)=>{
-    const i=sn.body.length-1-rev,px=ox+x*w,py=oy+y*w;
-    g.save();g.shadowBlur=i===0?13:0;g.shadowColor="#baff85";
-    rect(px+2,py+2,24,24,i===0?"#b8ff85":i%2?"#53dca0":"#46c98f");g.shadowBlur=0;
-    rect(px+5,py+5,18,6,i===0?"#e5ffb5":"#84eac0");
-    if(i===0){
-      const [dx,dy]=sn.dir;
-      const eye=(a,b)=>{rect(px+a,py+b,5,6,"#113b38");rect(px+a+1,py+b+1,2,2,"#fff")};
-      if(dx!==0){eye(dx>0?17:6,7);eye(dx>0?17:6,17)}
-      else{eye(7,dy>0?16:6);eye(18,dy>0?16:6)}
-    }
-    g.restore();
-  });
-  // Ambient fireflies and an animated perimeter glow without covering gameplay
-  for(let i=0;i<12;i++){
-    const x=69+(i*67)%821,y=55+(i*97)%430;
-    g.globalAlpha=.12+Math.abs(Math.sin(G.clock*1.5+i))*.20;
-    rect(x,y,3,3,"#c9fbd4");
-  }
-  g.globalAlpha=1;
-  g.save();g.shadowColor="#78edb7";g.shadowBlur=12;
-  rect(ox-8,oy-8,856,4,"#5ac9b1");rect(ox-8,oy+449,856,4,"#5ac9b1");g.restore();
-  txt("PONTOS  "+G.score,60,29,"#c4ffe6",18);
-  txt("SNAKE  •  PYTHON",650,29,"#6ec5bd",14);
-  st.textContent="Pontos: "+G.score;
+  rect(13,-1,2,2,"#16443a");
+  if(Math.sin(G.clock*9)>.3){
+   g.strokeStyle="#ff8eaa";g.lineWidth=2;g.beginPath();g.moveTo(15,2);g.lineTo(25,2);
+   g.moveTo(25,2);g.lineTo(29,-1);g.moveTo(25,2);g.lineTo(29,5);g.stroke();
+  }g.restore();
+ }
+ if(pts.length>1){
+  const t=pts[pts.length-1],before=pts[pts.length-2],ang=Math.atan2(t[1]-before[1],t[0]-before[0]);
+  g.save();g.translate(...t);g.rotate(ang);g.fillStyle="#45be7e";
+  g.beginPath();g.moveTo(0,-9);g.lineTo(22,0);g.lineTo(0,9);g.closePath();g.fill();g.restore();
+ }
+ txt("SNAKE  •  PYTHON",60,28,"#a0f4c0",16);
+ txt("PONTOS  "+G.score,703,28,"#d5fff3",16);
+ st.textContent="Pontos: "+G.score;
 }
 // NEON JUMP - ENDLESS ARCADE 3.0 (progressive, procedurally generated)
 let jp={};
@@ -391,7 +408,8 @@ function makeFloor(n){
     const hp=type==="boss"?12:type==="guard"?5:type==="bat"?2:3;
     rp.mobs.push({...p,type,hp,max:hp,cool:0});
   }
-  for(let i=0;i<2+n;i++){const p=spot();if(p)rp.items.push({...p,type:i===0?"potion":"shard"})}
+  const drops=["potion","shard","blade","boots","shield","orb"];
+ for(let i=0;i<2+n;i++){const p=spot();if(p)rp.items.push({...p,type:drops[i%drops.length]})}
   progress.best=Math.max(progress.best,n);saveProgress();
   announce(n===4?"CHEFE FINAL: O GUARDIÃO!":"ANDAR "+n+" - COLETE OS CRISTAIS!");
 }
@@ -399,28 +417,63 @@ function newRpg(){
   const plus=Math.min(4,Math.floor(progress.shards/12));
   rp={p:{x:2,y:6,hp:8+plus,max:8+plus,damage:1,level:1,dir:[1,0]},
     floor:1,shards:0,kills:0,potions:2,note:"",noteTime:0,inv:0,
-    cd:0,atk:0,enemyTick:0,moveTick:0,choosing:false,mobs:[],crystals:[],items:[],walls:new Set()};
+    cd:0,atk:0,enemyTick:0,moveTick:0,choosing:false,mobs:[],crystals:[],items:[],walls:new Set(),
+   stamina:4,boots:0,shield:0,magic:1,dashCd:0,dashFx:0,bolts:[],slashes:[]};
   makeFloor(1);
 }
 function hitWall(x,y){return !walkable(x,y)}
 function pickUp(){
   let ix=rp.crystals.findIndex(v=>v.x===rp.p.x&&v.y===rp.p.y);
-  if(ix>=0){rp.crystals.splice(ix,1);rp.got++;G.score+=100;announce("CRISTAL "+rp.got+"/"+rp.needed)}
+  if(ix>=0){rp.crystals.splice(ix,1);rp.got++;G.score+=100;rp.magic=Math.min(6,rp.magic+1);rp.stamina=Math.min(4,rp.stamina+1);announce("CRISTAL: +1 CARGA MÁGICA!")}
   ix=rp.items.findIndex(v=>v.x===rp.p.x&&v.y===rp.p.y);
   if(ix>=0){
     const v=rp.items.splice(ix,1)[0];
-    if(v.type==="potion"){rp.potions++;announce("POÇÃO ENCONTRADA")}
-    else{rp.shards+=3;G.score+=25;announce("+3 FRAGMENTOS")}
+    if(v.type==="potion"){rp.potions++;announce("POÇÃO: USE H PARA CURAR")}
+    else if(v.type==="shard"){rp.shards+=3;G.score+=25;announce("+3 FRAGMENTOS PERMANENTES")}
+    else if(v.type==="blade"){rp.p.damage++;announce("ESPADA EQUIPADA: +1 DE DANO")}
+    else if(v.type==="boots"){rp.boots++;announce("BOTAS EQUIPADAS: ESQUIVA MAIS RÁPIDA")}
+    else if(v.type==="shield"){rp.shield++;announce("ESCUDO EQUIPADO: -1 DE DANO")}
+    else if(v.type==="orb"){rp.magic=Math.min(6,rp.magic+3);announce("ORBE: +3 MAGIAS (F)")}
   }
 }
+function rpgStep(x,y){
+ if(!walkable(x,y)||rp.mobs.some(e=>e.x===x&&e.y===y))return false;
+ rp.p.x=x;rp.p.y=y;pickUp();return true;
+}
 function moveRpg(dx,dy){
-  if(!G.running)return;
-  rp.p.dir=[dx,dy];
-  const nx=rp.p.x+dx,ny=rp.p.y+dy;
-  if(nx===19&&ny===6){exitRpg();return}
-  if(hitWall(nx,ny))return;
-  if(rp.mobs.some(e=>e.x===nx&&e.y===ny)){attackRpg();return}
-  rp.p.x=nx;rp.p.y=ny;pickUp();
+ if(!G.running)return;
+ rp.p.dir=[dx,dy];
+ const x=rp.p.x+dx,y=rp.p.y+dy;
+ if(x===19&&y===6){exitRpg();return}
+ if(rpgStep(x,y))rp.stamina=Math.min(4,rp.stamina+.28);
+}
+function dodgeRpg(){
+ if(!G.running||rp.dashCd>0||rp.stamina<.75)return;
+ rp.stamina-=.75;rp.dashCd=Math.max(.65,1.7-rp.boots*.45);
+ rp.inv=Math.max(rp.inv,.67);rp.dashFx=.35;
+ const [dx,dy]=rp.p.dir;
+ for(let i=0;i<2+Math.min(1,rp.boots);i++)if(!rpgStep(rp.p.x+dx,rp.p.y+dy))break;
+ announce("ESQUIVA! INVULNERÁVEL POR UM INSTANTE");
+}
+function defeatMobs(){
+ const fallen=rp.mobs.filter(e=>e.hp<=0);
+ for(const e of fallen){
+  G.score+=e.type==="boss"?500:50;rp.shards+=e.type==="boss"?10:1;rp.kills++;
+  if(Math.random()<.3)rp.items.push({x:e.x,y:e.y,type:Math.random()<.5?"potion":"shard"});
+ }
+ if(fallen.some(e=>e.type==="boss"))announce("GUARDIÃO DERROTADO!");
+ rp.mobs=rp.mobs.filter(e=>e.hp>0);
+}
+function spellRpg(){
+ if(!G.running||rp.magic<1)return;
+ rp.magic--;const [dx,dy]=rp.p.dir;let hits=0;
+ for(let i=1;i<=6;i++){
+  let x=rp.p.x+dx*i,y=rp.p.y+dy*i;
+  if(!walkable(x,y))break;
+  rp.slashes.push({x,y,t:.28,kind:"magic"});
+  for(const e of rp.mobs)if(e.x===x&&e.y===y){e.hp-=3+Math.floor(rp.p.damage/2);e.wind=0;hits++}
+ }
+ defeatMobs();announce(hits?"MAGIA ATINGIU "+hits+" INIMIGOS":"RAIO MÁGICO DISPARADO");
 }
 function endExpedition(win){
   progress.shards+=rp.shards;
@@ -432,20 +485,27 @@ function endExpedition(win){
     "\nCada 12 fragmentos dão +1 de vida inicial (até +4).");
 }
 function damage(n){
-  if(rp.inv>0||!G.running)return;
-  rp.p.hp=Math.max(0,rp.p.hp-n);rp.inv=1.1;announce("-"+n+" VIDA");
-  if(rp.p.hp<=0)endExpedition(false);
+ if(!G.running||rp.inv>0)return;
+ const actual=Math.max(1,n-rp.shield);
+ rp.p.hp=Math.max(0,rp.p.hp-actual);rp.inv=1.1;
+ announce("-"+actual+" VIDA: ESQUIVE DAS MARCAS VERMELHAS!");
+ if(rp.p.hp<=0)endExpedition(false);
 }
 function attackRpg(){
-  if(!G.running||rp.cd>0)return;
-  rp.atk=.24;rp.cd=.33;
-  for(const e of rp.mobs){
-    if(Math.abs(e.x-rp.p.x)<=1&&Math.abs(e.y-rp.p.y)<=1)e.hp-=rp.p.damage;
+ if(!G.running||rp.cd>0)return;
+ if(rp.stamina<1){announce("SEM ENERGIA: MOVA-SE PARA RECUPERAR!");return}
+ rp.stamina--;rp.atk=.24;rp.cd=.42;
+ const [dx,dy]=rp.p.dir;let count=0;
+ const range=rp.p.damage>=3?2:1;
+ for(const e of rp.mobs){
+  const rx=e.x-rp.p.x,ry=e.y-rp.p.y;
+  const forward=rx*dx+ry*dy,lateral=Math.abs(rx*dy-ry*dx);
+  if(forward>=1&&forward<=range&&lateral<=1){
+   e.hp-=rp.p.damage;e.wind=0;count++;
+   rp.slashes.push({x:e.x,y:e.y,t:.3,kind:"slash"});
   }
-  const defeated=rp.mobs.filter(e=>e.hp<=0);
-  defeated.forEach(e=>{G.score+=e.type==="boss"?500:50;rp.shards+=e.type==="boss"?10:1;rp.kills++});
-  if(defeated.some(e=>e.type==="boss"))announce("O GUARDIÃO FOI DERROTADO!");
-  rp.mobs=rp.mobs.filter(e=>e.hp>0);
+ }
+ defeatMobs();if(!count)announce("ATAQUE FRONTAL: OLHE PARA O INIMIGO!");
 }
 function potion(){
   if(G.running&&rp.potions>0&&rp.p.hp<rp.p.max){
@@ -475,34 +535,58 @@ function chooseUpgrade(i){
   makeFloor(rp.floor+1);hide();G.running=true;G.last=performance.now();requestAnimationFrame(frame);
 }
 function updateRpg(dt){
-  rp.atk=Math.max(0,rp.atk-dt);rp.cd=Math.max(0,rp.cd-dt);
-  rp.inv=Math.max(0,rp.inv-dt);rp.noteTime=Math.max(0,rp.noteTime-dt);
-  rp.moveTick+=dt;rp.enemyTick+=dt;
-  if(rp.moveTick>.14){
-    rp.moveTick=0;
-    const directions={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
-    for(const k of ["ArrowUp","KeyW","ArrowDown","KeyS","ArrowLeft","KeyA","ArrowRight","KeyD"])
-      if(keys.has(k)){moveRpg(...directions[k]);break}
+ rp.atk=Math.max(0,rp.atk-dt);rp.cd=Math.max(0,rp.cd-dt);
+ rp.dashCd=Math.max(0,rp.dashCd-dt);rp.dashFx=Math.max(0,rp.dashFx-dt);
+ rp.inv=Math.max(0,rp.inv-dt);rp.noteTime=Math.max(0,rp.noteTime-dt);
+ rp.stamina=Math.min(4,rp.stamina+dt*.24);
+ for(const f of rp.slashes)f.t-=dt;
+ rp.slashes=rp.slashes.filter(f=>f.t>0);
+ for(const b of rp.bolts){
+  b.x+=b.vx*dt;b.y+=b.vy*dt;b.t-=dt;
+  if(Math.hypot(b.x-rp.p.x,b.y-rp.p.y)<.5){damage(b.power);b.t=-1}
+  if(!walkable(Math.round(b.x),Math.round(b.y)))b.t=-1;
+ }
+ rp.bolts=rp.bolts.filter(b=>b.t>0);
+ for(const e of rp.mobs){
+  e.cool=Math.max(0,(e.cool||0)-dt);
+  if(e.wind>0){
+   e.wind-=dt;
+   if(e.wind<=0){
+    e.wind=0;e.cool=1.3;
+    if(rp.p.x===e.aimX&&rp.p.y===e.aimY)damage(e.type==="boss"?2:1);
+   }
   }
-  if(!G.running)return;
-  if(rp.enemyTick>.98-rp.floor*.08){
-    rp.enemyTick=0;
-    for(const e of rp.mobs){
-      e.cool=Math.max(0,e.cool-.85);
-      const dx=rp.p.x-e.x,dy=rp.p.y-e.y,d=Math.abs(dx)+Math.abs(dy);
-      if(d<=1){
-        if(e.cool===0){damage(e.type==="boss"?2:1);e.cool=1.2}
-        if(!G.running)return;
-        continue;
-      }
-      if(d>(e.type==="bat"?10:8))continue;
-      const moves=Math.abs(dx)>=Math.abs(dy)?[[Math.sign(dx),0],[0,Math.sign(dy)]]:[[0,Math.sign(dy)],[Math.sign(dx),0]];
-      for(const [sx,sy] of moves){
-        const nx=e.x+sx,ny=e.y+sy;
-        if((sx||sy)&&walkable(nx,ny)&&!(nx===rp.p.x&&ny===rp.p.y)&&!rp.mobs.some(z=>z!==e&&z.x===nx&&z.y===ny)){e.x=nx;e.y=ny;break}
-      }
+ }
+ if(!G.running)return;
+ rp.moveTick+=dt;rp.enemyTick+=dt;
+ if(rp.moveTick>.145){
+  rp.moveTick=0;
+  const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
+  for(const k of ["ArrowUp","KeyW","ArrowDown","KeyS","ArrowLeft","KeyA","ArrowRight","KeyD"])
+   if(keys.has(k)){moveRpg(...d[k]);break}
+ }
+ if(rp.enemyTick>.75-rp.floor*.04){
+  rp.enemyTick=0;
+  for(const e of rp.mobs){
+   if(e.wind>0)continue;
+   const dx=rp.p.x-e.x,dy=rp.p.y-e.y,dist=Math.abs(dx)+Math.abs(dy);
+   if((e.type==="bat"||e.type==="boss")&&dist>=2&&dist<=8&&e.cool<=0&&
+       (Math.abs(dx)<=1||Math.abs(dy)<=1)){
+    const d=Math.hypot(dx,dy)||1;
+    rp.bolts.push({x:e.x,y:e.y,vx:dx/d*3.2,vy:dy/d*3.2,t:3,power:e.type==="boss"?2:1});
+    e.cool=2.2;
+   }
+   if(dist<=1&&e.cool<=0){e.wind=e.type==="boss"?.85:.64;e.aimX=rp.p.x;e.aimY=rp.p.y;continue}
+   if(dist>(e.type==="boss"?12:9))continue;
+   const opts=Math.abs(dx)>=Math.abs(dy)?[[Math.sign(dx),0],[0,Math.sign(dy)]]:[[0,Math.sign(dy)],[Math.sign(dx),0]];
+   for(const [sx,sy] of opts){
+    const x=e.x+sx,y=e.y+sy;
+    if((sx||sy)&&walkable(x,y)&&!(x===rp.p.x&&y===rp.p.y)&&!rp.mobs.some(z=>z!==e&&z.x===x&&z.y===y)){
+     e.x=x;e.y=y;break;
     }
+   }
   }
+ }
 }
 function drawRpg(){
   const theme=themes[rp.floor-1],bgc=g.createLinearGradient(0,0,960,540);
@@ -532,6 +616,11 @@ function drawRpg(){
     g.save();g.shadowBlur=11+Math.sin(G.clock*5+tx)*5;g.shadowColor="#ffae64";
     rect(x,y,8,17,"#af7256");g.fillStyle="#ffc777";g.beginPath();g.ellipse(x+4,y-5,6,9,0,0,7);g.fill();g.restore();
   }
+  for(let i=0;i<17;i++){
+    const fx=ox+15+(i*53)%755,fy=oy+15+(i*117)%430+Math.sin(G.clock*(1+i%3)*.8+i)*4;
+    g.globalAlpha=.15+Math.abs(Math.sin(G.clock+i))*.18;
+    rect(fx,fy,3,3,theme[4]);
+  }g.globalAlpha=1;
   const xPortal=ox+19*T,yPortal=oy+6*T;
   g.save();g.shadowBlur=25;g.shadowColor=portalReady()?"#62edb9":"#a889ff";
   rect(xPortal-2,yPortal,42,40,portalReady()?"#55deb8":"#9163cc");
@@ -541,6 +630,10 @@ function drawRpg(){
     const x=ox+v.x*T+20,y=oy+v.y*T+20+Math.sin(G.clock*4+v.x)*3;
     g.save();g.shadowColor=v.type==="potion"?"#ff849f":"#a1edff";g.shadowBlur=12;
     if(v.type==="potion"){rect(x-8,y-8,16,17,"#ee7597");rect(x-4,y-13,8,6,"#fff1dd")}
+    else if(v.type==="blade"){rect(x-2,y-14,5,24,"#d9f5ff");rect(x-8,y+4,17,5,"#f9ad72");rect(x-1,y+9,4,8,"#7069aa")}
+    else if(v.type==="boots"){rect(x-12,y-7,10,22,"#f0a26d");rect(x+2,y-7,10,22,"#f0a26d");rect(x-12,y+9,13,6,"#805d62");rect(x+2,y+9,13,6,"#805d62")}
+    else if(v.type==="shield"){g.fillStyle="#83caff";g.beginPath();g.moveTo(x,y-15);g.lineTo(x+13,y-8);g.lineTo(x+9,y+10);g.lineTo(x,y+16);g.lineTo(x-9,y+10);g.lineTo(x-13,y-8);g.closePath();g.fill();rect(x-2,y-7,4,18,"#fff2af")}
+    else if(v.type==="orb"){g.fillStyle="#cf9dff";g.beginPath();g.arc(x,y,12,0,7);g.fill();g.fillStyle="#f6ddff";g.beginPath();g.arc(x-4,y-4,5,0,7);g.fill()}
     else{g.fillStyle="#81eafa";g.beginPath();g.moveTo(x,y-13);g.lineTo(x+10,y);g.lineTo(x,y+12);g.lineTo(x-10,y);g.closePath();g.fill()}
     g.restore();
   }
@@ -549,6 +642,17 @@ function drawRpg(){
     g.save();g.shadowColor="#ffe889";g.shadowBlur=17;g.fillStyle="#ffe37b";
     g.beginPath();g.moveTo(x,y-14);g.lineTo(x+11,y);g.lineTo(x,y+14);g.lineTo(x-11,y);g.closePath();g.fill();g.restore();
   }
+  for(const e of rp.mobs){
+   if(e.wind>0){g.save();g.globalAlpha=.27+.25*Math.abs(Math.sin(G.clock*14));
+     rect(ox+e.aimX*T+2,oy+e.aimY*T+2,36,36,"#ff315b");
+     g.strokeStyle="#ffccdf";g.lineWidth=2;g.strokeRect(ox+e.aimX*T+3,oy+e.aimY*T+3,34,34);g.restore()}
+  }
+  for(const b of rp.bolts){
+   g.save();g.shadowColor="#daa3ff";g.shadowBlur=15;g.fillStyle="#dd9eff";
+   g.beginPath();g.arc(ox+b.x*T+20,oy+b.y*T+20,7,0,7);g.fill();g.restore();
+  }
+  for(const f of rp.slashes){g.save();g.globalAlpha=Math.min(1,f.t*3.3);
+   rect(ox+f.x*T+6,oy+f.y*T+6,28,28,f.kind==="magic"?"#9be4ff":"#ffe8a2");g.restore()}
   for(const e of rp.mobs){
     const bob=e.type==="bat"?Math.sin(G.clock*5+e.x)*4:e.type==="boss"?Math.sin(G.clock*2.5)*2:0;
     const x=ox+e.x*T+5,y=oy+e.y*T+6+bob;
@@ -566,18 +670,22 @@ function drawRpg(){
   g.save();if(rp.inv>0&&Math.floor(G.clock*12)%2===0)g.globalAlpha=.42;
   rect(px+3,py+8,28,25,"#3db7ed");rect(px+6,py-4,23,11,"#ba895f");rect(px+7,py+4,20,13,"#f9d9b8");
   rect(px+18,py+9,4,4,"#19263b");rect(px+3,py+17,7,13,"#4979ad");rect(px+25,py+17,7,13,"#4979ad");
-  if(rp.atk>0){g.shadowColor="#ffe8a5";g.shadowBlur=15;g.strokeStyle="#ffe59d";g.lineWidth=5;g.beginPath();g.arc(px+16,py+15,34,-1,1.7);g.stroke()}
+  if(rp.atk>0){g.save();g.translate(px+16,py+15);g.rotate(Math.atan2(rp.p.dir[1],rp.p.dir[0]));
+    g.shadowColor="#ffe8a5";g.shadowBlur=15;g.strokeStyle="#ffe59d";g.lineWidth=5;g.beginPath();g.arc(0,0,36,-.8,.8);g.stroke();g.restore()}
+  if(rp.dashFx>0){g.globalAlpha=rp.dashFx*1.8;rect(px-10,py+7,20,24,theme[4]);g.globalAlpha=1}
   rect(px+7,py-5,5,5,theme[4]);rect(px+13,py-8,8,4,"#f5c98c");
   g.restore();
   rect(80,511,800,26,"#0c1527");
-  txt("VIDA "+rp.p.hp+"/"+rp.p.max+"  ⚔ "+rp.p.damage+"   CRISTAIS "+rp.got+"/"+rp.needed+"   POÇÕES "+rp.potions+"   FRAG. "+rp.shards,90,530,"#f1f6ff",15);
+  txt("VIDA "+rp.p.hp+"/"+rp.p.max+"  ⚔ "+rp.p.damage+"  VIGOR "+rp.stamina.toFixed(1)+"/4"+
+      "  MAGIA "+rp.magic+"  ESCUDO "+rp.shield+"  BOTAS "+rp.boots,90,530,"#f1f6ff",14);
+  txt("CRISTAIS "+rp.got+"/"+rp.needed+" · POÇÕES "+rp.potions+" · FRAG. "+rp.shards,480,22,"#e0fbff",13);
   txt("ANDAR "+rp.floor+"/4 · "+theme[0]+" · NV "+rp.p.level,81,21,theme[4],16);
   if(rp.noteTime>0){rect(280,44,440,41,"#122039eb");txt(rp.note,292,70,"#ffe9b4",17)}
   st.textContent="Andar "+rp.floor+"/4 · ♥ "+rp.p.hp+"/"+rp.p.max+" · Cristais "+rp.got+"/"+rp.needed;
 }
 function draw(){if(G.game==="snake")drawSnake();if(G.game==="jump")drawJump();if(G.game==="rpg")drawRpg()}
-function control(key){if(G.game==="rpg"&&rp.choosing){if(["Digit1","Digit2","Digit3"].includes(key))chooseUpgrade(Number(key.slice(-1)));return}if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")exitRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
-window.addEventListener("keydown",e=>{let k=e.code;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(k))e.preventDefault();if(keys.has(k)&&e.repeat)return;keys.add(k);control(k)});
+function control(key){if(G.game==="rpg"&&rp.choosing){if(["Digit1","Digit2","Digit3"].includes(key))chooseUpgrade(Number(key.slice(-1)));return}if(key==="KeyR"){reset();start();return}if(key==="KeyP"){pause();return}if(G.game==="snake"){if(!G.running&&over.style.display!=="none"){start()}dirSnake(key);return}if(G.game==="jump"){if(key==="Space"||key==="ArrowUp"||key==="KeyW")jump();return}if(G.game==="rpg"){if(!G.running)return;if(key==="Space")attackRpg();else if(key==="KeyH")potion();else if(key==="KeyE")exitRpg();else if(key==="ShiftLeft"||key==="ShiftRight"||key==="KeyK")dodgeRpg();else if(key==="KeyF")spellRpg();else{const d={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]}[key];if(d)moveRpg(...d)}}}
+window.addEventListener("keydown",e=>{let k=e.code;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space","ShiftLeft","ShiftRight"].includes(k))e.preventDefault();if(keys.has(k)&&e.repeat)return;keys.add(k);control(k)});
 window.addEventListener("keyup",e=>keys.delete(e.code));window.addEventListener("blur",()=>keys.clear());
 document.querySelectorAll("[data-key]").forEach(b=>{b.addEventListener("pointerdown",e=>{e.preventDefault();keys.add(b.dataset.key);control(b.dataset.key)});for(const ev of ["pointerup","pointercancel","pointerleave"])b.addEventListener(ev,()=>keys.delete(b.dataset.key))});
 c.addEventListener("pointerdown",e=>{e.preventDefault();if(G.game==="jump")jump();else if(G.game==="rpg")attackRpg()});
