@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arcade das Linguagens V10 | Escolha e Jogue</title>
+<title>Arcade das Linguagens V11 | Escolha e Jogue</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 :root{color-scheme:dark;--bg:#080e19;--panel:#121d30;--ink:#f4f7ff;--muted:#9cabc4;--line:#30425d;--cyan:#7de6f5;--green:#84eba1;--purple:#c29aff;--yellow:#f9cd81}
@@ -108,7 +108,7 @@ footer{margin-top:22px;font-size:11px;color:#8a9cb4;text-align:center;line-heigh
 </head>
 <body>
 <main>
-<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><span class="hero-copy">Três universos jogáveis. Explore o clássico Snake, tente sobreviver ao Neon Jump e conquiste as masmorras de Crystal Quest.</span></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 10.0</b> · PYTHON · JAVA · C++</div></header>
+<header><div><div class="mini">TRABALHO DE PROGRAMAÇÃO · ARCADE</div><h1>3 linguagens. <mark>3 jogos.</mark></h1><span class="hero-copy">Três universos jogáveis. Explore o clássico Snake, tente sobreviver ao Neon Jump e conquiste as masmorras de Crystal Quest.</span></div><div class="pill"><b style="color:#a2ffda">ATUALIZAÇÃO 11.0</b> · PYTHON · JAVA · C++</div></header>
 
 <div class="hub-label"><div><div class="mini">ESCOLHA SEU UNIVERSO</div><h2>Selecione um jogo</h2><p>Clique na capa para começar, ou use as abas abaixo.</p></div><div class="hub-numeral">01 / 03 JOGOS</div></div>
 <section class="cover-gallery" aria-label="Escolha seu jogo">
@@ -140,9 +140,9 @@ footer{margin-top:22px;font-size:11px;color:#8a9cb4;text-align:center;line-heigh
 <g stroke="#a64dff" stroke-width="3"><path d="M10 273h34m9 0h44m145-44h25m8 0h38m90 26h52"/><path d="M164 258v35m190-77v32"/></g>
 <g fill="#a64dff"><path d="M93 257l20-43 20 43z"/><path d="M282 214l18-39 18 39z"/><path d="M430 241l17-40 17 40z"/></g>
 <g class="sparkle" fill="#ffe15a"><circle cx="298" cy="93" r="7"/><circle cx="140" cy="81" r="4"/><circle cx="427" cy="134" r="4"/></g>
-<g class="floating" transform="translate(224 127) rotate(-19)"><rect x="-47" y="-47" width="94" height="94" fill="#ffe15a" opacity=".22" filter="url(#v10glow)"/><rect x="-40" y="-40" width="80" height="80" rx="3" fill="#ffe15a"/><rect x="-22" y="-16" width="12" height="6" fill="#07070a"/><rect x="10" y="-16" width="12" height="6" fill="#07070a"/><rect x="-12" y="13" width="24" height="5" fill="#07070a"/></g>
+<g class="floating" transform="translate(224 127) rotate(-19)"><rect x="-47" y="-47" width="94" height="94" fill="#ffe15a" opacity=".22" filter="url(#v10glow)"/><rect x="-40" y="-40" width="80" height="80" rx="3" fill="#ffe15a"/><rect x="-22" y="-16" width="12" height="12" fill="#16578f"/><rect x="-20" y="-15" width="8" height="8" fill="#49bdff"/><rect x="10" y="-16" width="12" height="12" fill="#16578f"/><rect x="12" y="-15" width="8" height="8" fill="#49bdff"/><rect x="-12" y="13" width="24" height="5" fill="#07070a"/></g>
 <g stroke="#a64dff" opacity=".6" stroke-width="5"><path d="M115 153l54-17"/><path d="M98 175l51-17"/></g>
-</svg><span class="cover-play">▶</span><div class="cover-words"><span class="cover-tag">JAVA • PLATAFORMA</span><strong>NEON JUMP</strong><span>Preto, roxo e amarelo · Vida única</span></div>
+</svg><span class="cover-play">▶</span><div class="cover-words"><span class="cover-tag">JAVA • PLATAFORMA</span><strong>NEON JUMP</strong><span>Roxo em vários tons · Olhos azuis · Vida única</span></div>
 </button>
 <button type="button" class="cover-card" id="cover-rpg" aria-label="Jogar Crystal Quest">
    <svg class="cover-img" viewBox="0 0 500 325" role="img" aria-label="Herói aventureiro e dragão diante de um castelo">
@@ -166,7 +166,7 @@ footer{margin-top:22px;font-size:11px;color:#8a9cb4;text-align:center;line-heigh
    </svg><span class="cover-play">▶</span><div class="cover-words"><span class="cover-tag">C++ • ROGUELITE</span><strong>CRYSTAL QUEST</strong><span>Combate, exploração e magia</span></div>
  </button>
 </section>
-<div class="version-line"><span><span class="status-dot"></span>ARCADE V10 · SELECIONE E JOGUE</span><span>SEM DOWNLOAD</span></div>
+<div class="version-line"><span><span class="status-dot"></span>ARCADE V11 · SELECIONE E JOGUE</span><span>SEM DOWNLOAD</span></div>
 <nav class="tabs" aria-label="Escolher jogo">
 <button type="button" id="tab-snake" class="tab">🐍 Python · Snake</button>
 <button type="button" id="tab-jump" class="tab">⚡ Java · Neon Jump</button>
@@ -489,7 +489,7 @@ function drawJump(){
  // Three animated parallax layers are line-art rather than busy city illustrations.
  for(let depth=0;depth<3;depth++){
    const step=125+depth*57,move=jp.progress*(.045+depth*.082);
-   g.globalAlpha=[.13,.23,.38][depth];g.strokeStyle=C.purple;g.lineWidth=depth+1;
+   g.globalAlpha=[.13,.23,.38][depth];g.strokeStyle=[C.violet,C.purple,C.lavender][depth];g.lineWidth=depth+1;
    for(let i=-2;i<Math.ceil(960/step)+3;i++){
      const x=i*step-(move%step);
      const height=35+((i*47+depth*29+10000)%92);
@@ -505,7 +505,7 @@ function drawJump(){
    const x=((i*101-jp.progress*.055)%1200+1200)%1200;
    const y=45+(i*73)%275+Math.sin(t*.7+i)*4;
    g.save();g.globalAlpha=.16+Math.abs(Math.sin(t*.8+i))*.14;
-   g.strokeStyle=C.purple;g.lineWidth=2;
+   g.strokeStyle=i%3===0?C.lavender:C.purple;g.lineWidth=2;
    g.beginPath();g.arc(x,y,9+(i%5)*4,0,Math.PI*2);g.stroke();g.restore();
  }
  // Ground is pure black with a purple upper edge and precision-carved grid.
@@ -536,7 +536,7 @@ function drawJump(){
    if(p.broken)continue;
    const x=p.x-jp.progress;if(x>1100||x+p.w<-60)continue;
    g.save();g.shadowColor=C.purple;g.shadowBlur=9;
-   rect(x,p.y,p.w,16,C.purple);g.shadowBlur=0;
+   rect(x,p.y,p.w,16,C.purple);g.shadowBlur=0;rect(x,p.y,p.w,3,C.lavender);
    rect(x+3,p.y+3,p.w-6,12,C.black);
    for(let i=0;i<Math.floor(p.w/23);i++)rect(x+9+i*23,p.y+8,11,2,C.purple);
    if(p.fragile){
@@ -567,23 +567,37 @@ function drawJump(){
  for(const o of jp.obstacles){
    const x=o.x-jp.progress;if(x>1050||x+o.w<-70)continue;
    g.save();g.strokeStyle=C.purple;g.fillStyle=C.black;g.shadowColor=C.purple;g.shadowBlur=9;g.lineWidth=4;
-   if(o.type==="spike"||o.type==="double"){
-     const n=o.type==="double"?2:1,w=o.w/n;
+   if(o.type==="spike"||o.type==="double"||o.type==="triple"){
+     const n=o.type==="double"?2:o.type==="triple"?3:1,w=o.w/n;
      for(let i=0;i<n;i++){
        const xx=x+i*w;
        g.beginPath();g.moveTo(xx,JGROUND);g.lineTo(xx+w/2,o.y);g.lineTo(xx+w,JGROUND);
        g.closePath();g.fill();g.stroke();
+       // Distinct lavender tip, a darker purple body and a bright specular line.
+       g.shadowBlur=11;g.shadowColor=C.tip;g.fillStyle=C.tip;
+       g.beginPath();g.moveTo(xx+w/2,o.y+2);g.lineTo(xx+w/2-5,o.y+15);g.lineTo(xx+w/2+5,o.y+15);g.closePath();g.fill();
+       g.shadowBlur=0;
        // Dangerous interior tip glows purple; no invisible surrounding box.
        g.globalAlpha=.45;g.beginPath();
        g.moveTo(xx+w*.28,JGROUND-5);g.lineTo(xx+w/2,o.y+14);g.lineTo(xx+w*.72,JGROUND-5);
        g.closePath();g.fillStyle=C.purple;g.fill();g.fillStyle=C.black;g.globalAlpha=1;
      }
-   }else if(o.type==="saw"||o.type==="moving_saw"){
-     const cy=JGROUND-31+(o.type==="moving_saw"?Math.sin(t*3+o.x*.01)*19:0);
-     g.translate(x+o.w/2,cy);g.rotate(t*5.4);
+   }else if(o.type==="floating_spike"){
+     const y=o.y+Math.sin(t*2.4+o.x*.005)*7;
+     g.fillStyle=C.deep;g.strokeStyle=C.lavender;g.lineWidth=3;
+     g.beginPath();g.moveTo(x+5,y+5);g.lineTo(x+o.w-5,y+5);g.lineTo(x+o.w/2,y+o.h-4);g.closePath();g.fill();g.stroke();
+     rect(x+o.w/2-4,y+o.h-13,8,7,C.tip);
+   }else if(o.type==="saw"||o.type==="moving_saw"||o.type==="pendulum"){
+     const cy=o.type==="pendulum"?o.y+o.h/2+Math.cos(t*2.8+o.x*.01)*25:
+       JGROUND-31+(o.type==="moving_saw"?Math.sin(t*3+o.x*.01)*19:0);
+     const mx=o.type==="pendulum"?Math.sin(t*2.3+o.x*.013)*19:0;
+     if(o.type==="pendulum"){
+       g.strokeStyle=C.lavender;g.lineWidth=3;g.beginPath();g.moveTo(x+o.w/2,o.y-65);g.lineTo(x+o.w/2+mx,cy);g.stroke();
+     }
+     g.translate(x+o.w/2+mx,cy);g.rotate(t*5.4);
      g.beginPath();for(let k=0;k<16;k++){const a=k*Math.PI/8,r=k%2?15:27;g.lineTo(Math.cos(a)*r,Math.sin(a)*r)}
      g.closePath();g.fill();g.stroke();g.shadowBlur=0;
-     g.fillStyle=C.yellow;g.beginPath();g.arc(0,0,5,0,7);g.fill();
+     g.fillStyle=C.blue;g.beginPath();g.arc(0,0,5,0,7);g.fill();
    }else if(o.type==="laser"){
      const active=Math.sin(t*2.6+o.x*.011)>.38;
      rect(x,o.y,9,o.h,C.purple);rect(x+o.w-9,o.y,9,o.h,C.purple);
@@ -592,7 +606,7 @@ function drawJump(){
      else{g.globalAlpha=.35;rect(x+13,o.y+o.h/2,o.w-26,2,C.purple);g.globalAlpha=1}
    }else{
      g.strokeRect(x+2,o.y+2,o.w-4,o.h-4);
-     rect(x+7,o.y+7,o.w-14,o.h-14,C.black);
+     rect(x+7,o.y+7,o.w-14,o.h-14,C.deep);rect(x+7,o.y+7,o.w-14,4,C.lavender);
      for(let i=0;i<3;i++){
        const rx=x+12+i*12;
        rect(rx,o.y+15,5,5,C.purple);
@@ -618,12 +632,29 @@ function drawJump(){
      g.beginPath();g.moveTo(x,y);g.lineTo(x-22-jp.tier*3,y);g.stroke();
    }g.restore();
  }
- // Main character is a simple YELLOW SQUARE; rotation & squash are the animation.
+ // Animated translucent afterimages and landing shockwave.
+ for(const tr of jp.afterimages){
+   g.save();g.globalAlpha=tr.t*.7;g.translate(tr.x,tr.y);g.rotate(tr.angle);
+   rect(-17,-17,34,34,C.gold);g.restore();
+ }
+ if(jp.landPulse>0){
+   g.globalAlpha=jp.landPulse*3;
+   g.strokeStyle=C.yellow;g.lineWidth=3;g.beginPath();
+   g.ellipse(185,jp.y+JSIZE,31+(1-jp.landPulse/.18)*29,7,0,0,Math.PI*2);g.stroke();g.globalAlpha=1;
+ }
+ // Yellow square, blue animated eyes, lively blink and violet-edged shading.
  g.save();g.translate(185,jp.y+JSIZE/2);g.rotate(jp.angle);
  g.shadowColor=C.yellow;g.shadowBlur=18;
  rect(-19,-19,38,38,C.yellow);g.shadowBlur=0;
- rect(-13,-12,8,3,C.black);rect(5,-12,8,3,C.black);
- rect(-9,7,18,3,C.black);g.restore();
+ rect(-19,-19,38,5,C.softYellow);rect(-19,-19,4,38,C.softYellow);
+ rect(14,-19,5,38,C.gold);rect(-19,14,38,5,C.gold);
+ const blink=Math.sin(t*2.05)>.993;
+ for(const eyeX of [-11,5]){
+   rect(eyeX,-10,8,blink?2:11,C.blueDark);
+   if(!blink){rect(eyeX+2,-9,5,7,C.blue);rect(eyeX+3,-8,2,3,C.softYellow)}
+ }
+ rect(-7,7,14,3,C.black);
+ g.restore();
  // Warn about impending obstacles, in the same palette.
  const world=jp.progress+185;
  const next=[...jp.obstacles.map(v=>({x:v.x,label:"OBSTÁCULO"})),
@@ -638,9 +669,9 @@ function drawJump(){
  }
  // Three-color HUD; no extra backgrounds or color variants.
  txt("NEON JUMP  ∞  •  VIDA ÚNICA",24,41,C.yellow,19);
- txt("DISTÂNCIA  "+Math.floor(jp.progress/10)+" m",24,73,C.purple,16);
+ txt("DISTÂNCIA  "+Math.floor(jp.progress/10)+" m",24,73,C.lavender,16);
  txt("VELOCIDADE  "+Math.round(jp.speed),730,42,C.yellow,15);
- txt("RECORDE  "+jp.best,766,74,C.purple,15);
+ txt("RECORDE  "+jp.best,766,74,C.lavender,15);
  txt("MEDALHAS "+jp.challenges+"  COMBO "+jp.streak,550,104,C.yellow,13);
  if(jp.messageTime>0){
    g.globalAlpha=.95;g.strokeStyle=C.purple;g.lineWidth=2;
